@@ -1,0 +1,42 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definitions
+
+% New Oxford Belt crest
+
+%Using latex metafont (Mathematical Institute system)
+\font\beltcrestfont=oxbeltcrest
+\def\beltcrest{{\beltcrestfont \char0}}
+%For comlab system replace 1st line above with
+%\font\beltcrestfont=newcrest
+
+\newcommand{\submittedtext}{{A thesis submitted for the degree of}}
+\newcommand{\degreedate}{Trinity 2012}
+\newcommand{\degree}{Doctor of Philosophy}
+\newcommand{\college}{Hertford College}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Page 1
+
+{%
+\thispagestyle{plain}
+
+\null\vfill
+\begin{center}
+{\Huge {\bfseries {\makeatletter\@title\makeatother}} \par}
+{\large \vspace*{25mm} {\beltcrest \par} \vspace*{25mm}}
+{{\Large \makeatletter\@author\makeatother} \par}
+{\large \vspace*{1ex}
+{{\college} \par}
+\vspace*{1ex}
+{University of Oxford \par}
+\vspace*{20mm}
+{{\submittedtext} \par}
+\vspace*{1ex}
+{\it {\degree} \par}
+\vspace*{2ex}
+{\degreedate}}
+\end{center}
+\null\vfill
+
+\cleardoublepage}
+

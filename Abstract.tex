@@ -1,0 +1,43 @@
+\chapter*{Abstract}
+
+\begin{tabular}{@{}ll@{}}
+{\bfseries Title}   & Practical improvements to the deformation method for point counting \\
+{\bfseries Name}    & Sebastian Pancratz \\
+{\bfseries College} & Hertford College \\
+{\bfseries Degree}  & Doctor of Philosophy in Mathematics \\
+{\bfseries Term}    & Trinity~2012
+\end{tabular}
+
+\bigskip
+
+\noindent
+In this thesis we investigate practical aspects related 
+to point counting problems on algebraic varieties over finite fields. 
+In particular, we present significant improvements to Lauder's 
+deformation method for smooth projective hypersurfaces, which 
+allow this method to be successfully applied to previously 
+intractable instances.
+
+{Part~I} is dedicated to the deformation method, including a complete 
+description of the algorithm but focussing on aspects for which we 
+contribute original improvements.  In Chapter~\ref{ch:01-DiagFrob} 
+we describe the computation of the action of Frobenius on the rigid 
+cohomology space associated to a diagonal hypersurface; 
+in Chapter~\ref{ch:GMConnection} we develop a method for fast 
+computations in the de~Rham cohomology spaces associated to the family, 
+which allows us to compute the Gauss--Manin connection matrix.  
+We conclude this part with a small selection of examples in 
+Chapter~\ref{ch:01-Exmp}.
+
+In {Part~II} we present an improvement to Lauder's fibration method. 
+We manage to resolve the bottleneck in previous computation, which is 
+formed by so-called polynomial radix conversions, employing power 
+series inverses and a more efficient implementation.
+
+Finally, {Part~III} is dedicated to a comprehensive treatment of 
+the arithmetic in unramified extensions of~$\mathbf{Q}_p$, which is 
+connected to the previous parts where our computations rely on efficient 
+implementations of $p$-adic arithmetic.  We have made these routines 
+available for others in {\sc{FLINT}} as individual modules for $p$-adic 
+arithmetic.
+

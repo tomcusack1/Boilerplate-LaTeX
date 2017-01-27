@@ -1,0 +1,1006 @@
+% Chapter:  Constructing the Gauss--Manin connection  %%%%%%%%%%%%%%%%%%%%%%%%%
+
+In this chapter we return to the relative situation of a family of 
+smooth projective hypersurfaces.  Specifically, we recall that given 
+a family $X$ of smooth projective hypersurfaces over a finite field~$k$ 
+we consider a lift $\mathfrak{X}$ in $\mathbf{P}^n(K) \times \mathbf{A}^1(K)$ 
+defined by $P \in K[t][x_0, \dotsc, x_n]$ where $K$ is a field of 
+characteristic zero.  The goal of this chapter is to 
+describe a practical routine for computing the action of the Gauss--Manin 
+connection, viewed as a Leibniz-linear map on $\HdR^n(\mathfrak{U})$ where 
+$\mathfrak{U}$ is the complement of $\mathfrak{X}$.
+
+The material in this chapter is arranged as follows.  We begin by introducing 
+the Gauss--Manin connection in a scheme-theoretic set-up following Katz and 
+Oda~\citep{KatzOda1968}.  Specialising to the case of hypersurfaces, we 
+then follow Abbott, Kedlaya, and Roe~\citep{AbbottKedlayaRoe2006} in the 
+description of arithmetic in algebraic de~Rham cohomology.  This leads us 
+to a complete description of the algorithm, including critical details on 
+sparse matrix techniques used to accelerate the computations.  Finally, we 
+present computational examples, comparing the runtimes achieved by our approach 
+to previous work where possible.
+
+% Scheme-theoretic introduction  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Scheme-theoretic introduction}
+
+In this section, we give a brief introduction to the Gauss--Manin connection 
+in the algebraic sense, following Katz and Oda~\citep{KatzOda1968}.  
+We consider two smooth schemes $\mathfrak{X}$ and $\mathfrak{S}$ over a 
+field~$K$ of characteristic zero together with a smooth $K$-morphism 
+$\pi \colon \mathfrak{X} \to \mathfrak{S}$.
+
+\begin{defn}
+A \emph{connection} on a quasi-coherent $\mathcal{O}_{\mathfrak{S}}$-module 
+$\mathcal{E}$ is defined to be a homomorphism~$\rho$ of abelian sheaves
+\begin{equation*}
+\rho \colon \mathcal{E} \to 
+    \Omega_{\mathfrak{S}/K}^1 \otimes_{\mathcal{O}_{\mathfrak{S}}} \mathcal{E}
+\end{equation*}
+such that
+\begin{equation*}
+\rho(s e) = s \rho(e) + ds \otimes e
+\end{equation*}
+for sections $s$ and $e$ of $\mathcal{O}_{\mathfrak{S}}$ and $\mathcal{E}$, 
+respectively, over an open subset of~$\mathfrak{S}$.
+\end{defn}
+
+\begin{rem}
+We observe that this can be extended to the whole de~Rham complex as follows. 
+For every $i \in \N$, given $\omega \in \Omega_{\mathfrak{S}/K}^i$ and 
+$e \in \mathcal{E}$ let $\omega \wedge \rho(e)$ denote the image of 
+$\omega \otimes \rho(e)$ under the map
+\begin{equation*}
+\Omega_{\mathfrak{S}/K}^i \otimes_{\mathcal{O}_{\mathfrak{S}}} 
+    \bigl(\Omega_{\mathfrak{S}/K}^1 \otimes_{\mathcal{O}_{\mathfrak{S}}} \mathcal{E}\bigr) 
+    \to \Omega_{\mathfrak{S}/K}^{i+1} \otimes_{\mathcal{O}_{\mathfrak{S}}} \mathcal{E}, \quad 
+\omega \otimes (\tau \otimes e) \mapsto (\omega \wedge \tau) \otimes e.
+\end{equation*}
+We then obtain a homomorphism of abelian sheaves $\rho_i$ given by 
+\begin{equation*}
+\rho_i \colon \Omega_{\mathfrak{S}/K}^i \otimes_{\mathcal{O}_{\mathfrak{S}}} \mathcal{E} 
+    \to \Omega_{\mathfrak{S}/K}^{i+1} \otimes_{\mathcal{O}_{\mathfrak{S}}} \mathcal{E}, \quad 
+    \omega \otimes e \mapsto d \omega \otimes e + (-1)^i \omega \wedge \rho(e).
+\end{equation*}
+\end{rem}
+
+\begin{defn}
+The complex $\Omega_{\mathfrak{X}/K}^{\bullet}$ admits a decreasing filtration given by 
+\begin{equation*}
+F^j = 
+    \fIm\Bigl( \Omega_{\mathfrak{X}/K}^{\bullet - j} \otimes_{\mathcal{O}_{\mathfrak{X}}} 
+    \pi^* \bigl(\Omega_{\mathfrak{S}/K}^j\bigr) \to \Omega_{\mathfrak{X}/K}^{\bullet} \Bigr).
+\end{equation*}
+Forming a spectral sequence $\{E_r, d_r\}_{r \geq 0}$ as in Griffiths and 
+Harris~\citep[\S 3.5, p.\ 440]{GriffithsHarris1978}, we find that 
+\begin{equation*}
+E_1^{i,j} = 
+    \Omega_{\mathfrak{S}/K}^i \otimes_{\mathcal{O}_{\mathfrak{S}}} 
+    \mathcal{H}_{dR}^j(\mathfrak{X}/\mathfrak{S}).
+\end{equation*}
+The \emph{(algebraic) Gauss--Manin connection} $\nabla$ is now defined as 
+the differential $d_1^{0,j}$, i.e., 
+\begin{equation*}
+\nabla = 
+    d_1^{0,j} \colon \mathcal{H}_{dR}^j(\mathfrak{X}/\mathfrak{S}) \to 
+    \Omega_{\mathfrak{S}/K}^1 \otimes_{\mathcal{O}_{\mathfrak{S}}} 
+    \mathcal{H}_{dR}^j(\mathfrak{X}/\mathfrak{S}).
+\end{equation*}
+\end{defn}
+
+\begin{rem}
+From the description by Katz and Oda~\citep{KatzOda1968} and following the 
+practical description by Kedlaya~\citep{Kedlaya2008}, we can describe the 
+action of the Gauss--Manin connection further in the case when $\mathfrak{S}$ 
+is affine, say $\mathfrak{S} = \Spec(A)$.  In this case, we may apply the 
+global section functor $\Gamma(\mathfrak{S}, -)$ throughout and consider
+\begin{equation*}
+\nabla \colon \HdR^j(\mathfrak{X}/\mathfrak{S}) \to 
+    \Omega_{A/K}^1 \otimes_{A} \HdR^j(\mathfrak{X}/\mathfrak{S}).
+\end{equation*}
+The action of $\nabla$ can be computed as follows.  Given 
+$\omega \in \HdR^j(\mathfrak{X}/\mathfrak{S})$, arbitrarily lift this to 
+$\tilde{\omega} \in \Omega_{\mathfrak{X}/K}^j$.  After computing the 
+exterior derivative, which decomposes as 
+$d_{\mathfrak{X}/K} = d_{\mathfrak{S}} + d_{\mathfrak{X}/\mathfrak{S}}$, 
+the image of $\omega$ under the Gauss--Manin connection is given as 
+the projection of $d_{\mathfrak{X}/K}(\tilde{\omega})$ onto 
+$\Omega_{A/K}^1 \otimes_{A} \HdR^j(\mathfrak{X}/\mathfrak{S})$.
+\end{rem}
+
+% Hypersurfaces in projective space  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Hypersurfaces in projective space}
+\label{sec:01-04-hypersurfaces}
+
+In this section we make the results from the previous section concrete, 
+specialising to the case of hypersurfaces in projective space.  In the 
+development of a computationally feasible description of the Gauss--Manin 
+connection in this situation, we follow Abbott, Kedlaya and 
+Roe~\citep[\S 3.2]{AbbottKedlayaRoe2006} when computing in 
+de~Rham cohomology and Kedlaya~\citep[\S 3.2]{Kedlaya2008} when 
+expressing the action of the Gauss--Manin connection.  We begin by recalling 
+the notation relevant in this chapter.
+
+\begin{notation} \label{not:01-04-main}
+We consider a non-singular hypersurface~$\mathfrak{X}$ in 
+$\mathbf{P}^n(K) \times \A^1(K)$, where $K$ is a field of characteristic 
+zero and $n \geq 2$, defined by a homogeneous polynomial 
+$P \in K[t][x_0, \dotsc, x_n]$ of degree~$d$.  We let $\mathfrak{U}$ denote 
+the open complement $\mathbf{P}^n(K) \times \A^1(K) - \mathfrak{X}$.
+
+Moreover, we may also view this as two smooth $K$-schemes 
+$\mathfrak{X}$ and $\mathfrak{S}$ together with a smooth proper 
+$K$-morphism $\mathfrak{X} \to \mathfrak{S}$, where we consider 
+an affine subspace $\mathfrak{S} = \Spec(A)$ of the $t$-line\footnotemark.  
+We denote the fibre of $\mathfrak{X}$ above $t$ in $\mathfrak{S}$ 
+by $\mathfrak{X}_t$.
+\end{notation}
+
+\footnotetext{We typically choose $A = K[t,r(t)^{-1}]$ where $r(t)$ is 
+the Macaulay resultant of $\mathfrak{X}$ in order to exclude non-singular 
+fibres.  But it is harmless to exclude a finite number of additional 
+fibres if this is convenient.}
+
+Let us consider a smooth fibre~$\mathfrak{X}_t$.  The embedding 
+$\mathfrak{X}_t \into \mathbf{P}^n(K)$ induces maps 
+$\HdR^i(\mathbf{P}^n(K)/K) \to \HdR^i(\mathfrak{X}_t/K)$, which 
+by the Lefschetz hyperplane theorem~\citep[\S 1.2, p.\ 156]{GriffithsHarris1978} 
+are bijective for $0 \leq i \leq n-2$ and injective for $i = n-1$.  A direct 
+computation~\citep[Corollary~3.1.4]{AbbottKedlayaRoe2006} shows that 
+$\HdR^i(\mathbf{P}^n(K))$ has, as a $K$-vector space, dimension~$1$ if 
+$i = 0, 2, \dotsc, 2n$ and $0$ otherwise.  Using Poincar\'e duality, it then 
+follows that, for all $0 \leq i \leq 2n-2$ with $i \neq n-1$, 
+\begin{equation}
+\dim_K \HdR^i(\mathfrak{X}_t/K) = \begin{cases} 1 & \text{if $i$ is even,} \\ 
+                                    0 & \text{otherwise.} \end{cases}
+\end{equation}
+In particular, $\HdR^{n-1}(\mathfrak{X}_t/K)$ is the only 
+cohomology group that remains to be determined.  Defining the complement 
+$\mathfrak{U}_t = \mathbf{P}^n(K) - \mathfrak{X}_t$, 
+from~\citep[(10.16)]{Griffiths1969}, we have one of the following two exact 
+sequences
+\begin{gather}
+0 \to \HdR^n(\mathfrak{U}_t/K) \to \HdR^{n-1}(\mathfrak{X}_t/K) \to 0, \\
+0 \to \HdR^n(\mathfrak{U}_t/K) \to \HdR^{n-1}(\mathfrak{X}_t/K) \to \HdR^{n+1}(\mathbf{P}^n(K)/K) \to 0,
+\end{gather}
+as $n$ is even or odd, respectively.
+
+Now define the $n$-form 
+\begin{equation}
+\Omega = \sum_{i=0}^n (-1)^i x_i d x_0 \wedge \dotsb \wedge \widehat{d x_i} \wedge \dotsb \wedge d x_n.
+\end{equation}
+A calculation as in~\citep[\S 4]{Griffiths1969} then shows that the 
+above cohomology group $\HdR^n(\mathfrak{U}_t/K)$ is isomorphic as a 
+$K$-vector space to the quotient of the group of $n$-forms $Q \Omega / P^k$ 
+with $k \in \N$ and $Q \in K[x_0, x_1, \dotsc, x_n]$ homogeneous of degree 
+$k d - (n + 1)$ by the subgroup generated by 
+\begin{equation} \label{eq:PoleReductionQuotient}
+\frac{(\partial_i Q) \Omega}{P^k} - k \frac{Q (\partial_i P) \Omega}{P^{k+1}}
+\end{equation}
+for all $0 \leq i \leq n$, where here and in the following $\partial_i$ 
+denotes the partial derivative operator with respect to~$x_i$.
+
+Since the fibres of the relative de~Rham cohomology 
+$\HdR^i(\mathfrak{X}/\mathfrak{S})$ can be identified with the de~Rham 
+cohomology $\HdR^i(\mathfrak{X}_t/K)$ of the fibres, it 
+follows that we can compute the action of the Gauss--Manin connection 
+$\nabla \colon \HdR^{n-1}(\mathfrak{X}/\mathfrak{S}) \to 
+\Omega_{A/K}^1 \otimes_{A} \HdR^{n-1}(\mathfrak{X}/\mathfrak{S})$
+via the induced map 
+$\HdR^n(\mathfrak{U}/\mathfrak{S}) \to 
+\Omega_{A/K}^1 \otimes_{A} \HdR^n(\mathfrak{U}/\mathfrak{S})$, 
+which by abuse of notation we shall refer to as $\nabla$, too.  
+Let $\omega \in \HdR^{n}(\mathfrak{U}/\mathfrak{S})$, where we may 
+assume it is of the form $Q \Omega / P^k$ as described above.  Since 
+$\mathfrak{S}$ is an affine curve, we have that $\Omega_{A/K}^1$ is 
+free of rank one, generated by the symbol~$dt$.  Then the action of 
+$\nabla$ is given by 
+\begin{equation}
+\nabla \colon \omega \mapsto d_{\mathfrak{U}}(\omega) = 
+    d_{\mathfrak{S}}(\omega) + d_{\mathfrak{U}/\mathfrak{S}}(\omega) = 
+    \frac{\partial}{\partial t} \omega \wedge dt
+\end{equation}
+where the term $d_{\mathfrak{U}/\mathfrak{S}}(\omega)$ vanishes by 
+definition of $\Omega$.  We will describe how a unique representative 
+can be obtained for the right-hand side in the following two sections.
+
+% Computing in de Rham cohomology  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Computing in de~{R}ham cohomology}
+
+This section is devoted to an in-depth description of the computation in 
+de~Rham cohomology, exploiting the vector space isomorphism given in 
+the previous section.  We begin by setting up the notation and then describe 
+the so-called \emph{reduction of poles} procedure in some generality.  
+A particular problem, that of finding the coordinates of an element of a 
+multivariate polynomial ideal, is treated as a black box, but we turn to it 
+in the second subsection where we specialise to the case when the family of 
+projective hypersurfaces contains a diagonal fibre.  Finally, we provide 
+further details on the matrix computations involved in the third subsection.
+
+% Subsection:  Reduction of poles  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Reduction of poles}
+\label{sec:01-04-reduction}
+
+This section is based on~\citep[Remark~3.2.5]{AbbottKedlayaRoe2006}, 
+describing a \emph{reduction of poles} procedure also referred to as the 
+Griffiths--Dwork method.  We continue with the same 
+Notation~\ref{not:01-04-main}, but since for large parts of the discussion 
+it will not matter that $K(t)$ is a function field, we also define $L = K(t)$.
+
+From the description of $\HdR^n(\mathfrak{U}/\mathfrak{S})$ in the 
+introduction, with its elements being represented by $n$-forms 
+$Q \Omega / P^i$ for $i \in \N$, it is clear that it can be equipped 
+with a filtration whose $i$th part consists of all elements which can 
+be represented by $n$-forms as above with $\deg Q = k d - (n+1)$ for 
+$1 \leq k \leq i+1$.
+
+We can obtain a basis for $\HdR^n(\mathfrak{U}/\mathfrak{S})$ 
+respecting this filtration as follows.  For every $k \in \N$, we find 
+an independent set $B_k$ of polynomials of degree $kd-(n+1)$ generating 
+the quotient of the space of all such polynomials by the Jacobian ideal 
+$(\partial_0 P, \dotsc, \partial_n P)$.  This yields a generating set 
+$\bigcup_{k \in \N} \cB_k$ for $\HdR^n(\mathfrak{U}/\mathfrak{S})$ where 
+$\cB_k = \{Q \Omega / P^k : Q \in B_k\}$.  However, it follows from a 
+theorem of Macaulay~\citep[\S 4, (4.11)]{Griffiths1969} that in fact 
+the set $\cB_1 \cup \dotsb \cup \cB_n$ already forms a generating set.  In 
+the next subsection, we shall exhibit an explicit basis of monomials in the 
+case where the family of projective hypersurfaces contains a diagonal fibre.
+
+Now, to obtain a unique representative for the class of $Q \Omega / P^k$ 
+in terms of the basis elements in $\cB_1 \cup \dotsb \cup \cB_n$, we 
+express $Q$ in terms of $\partial_0 P, \dotsc, \partial_n P$ as well as 
+elements of $B_k$, and then iteratively reduce the pole order of the first 
+part according to the relations given by the expressions from 
+equation~\eqref{eq:PoleReductionQuotient}.  Assume that we have at our 
+disposal a routine {\sc Decompose} which, given a polynomial $Q$ of degree 
+$kd - (n+1)$ in the ideal generated by the Jacobian ideal 
+$(\partial_0 P, \dotsc, \partial_n P)$ together with the set $B_k$, returns an 
+expression of the form 
+$Q = Q_0 \partial_0 P + \dotsb + Q_n \partial_n P + \gamma_k$ with 
+$Q_0, \dotsc, Q_n$ homogeneous polynomials in $L[x_0, \dotsc, x_n]$ and 
+$\gamma_k$ in the $L$-span of $B_k$.  The reduction of poles procedure can 
+then be formalised as in Algorithm~\ref{alg:PoleReduction} below, which we 
+will refer to as {\sc Reduce}.  In this generality, the correctness of the 
+algorithm depends on a theorem of Macaulay~\citep[\S 4, (4.11)]{Griffiths1969}.
+
+\begin{algorithm}
+\caption{Reduce $Q \Omega / P^k$ in $\HdR^n(\mathfrak{U}/\mathfrak{S})$}
+\label{alg:PoleReduction}
+\begin{algorithmic}
+\vspace{1mm}
+%\Require \begin{compactitem}
+%         \item $P$ is a homogeneous polynomial in $L[x_0, \dotsc, x_n]$ of 
+%               degree $d$, defining a non-singular hypersurface, where $L$ is 
+%               a field of characteristic zero.
+%         \item For $1 \leq k \leq n$, $B_k$ is a basis for all homogeneous 
+%               polynomials of degree $kd - (n+1)$ modulo the Jacobian ideal 
+%               $(\partial_0 P, \dotsc, \partial_n P)$.
+%         \item $Q$ is a homogeneous polynomial of degree $kd-(n+1)$.
+%         \end{compactitem}
+\Require $P$ is a homogeneous polynomial in $L[x_0, \dotsc, x_n]$, 
+         $\ch(L) = 0$, of degree~$d$ defining a smooth hypersurface; 
+         $B_k$, for $1 \leq k \leq n$, is a basis for all homogeneous 
+         polynomials of degree $kd - (n+1)$ modulo 
+         $(\partial_0 P, \dotsc, \partial_n P)$;  $Q$ is homogeneous of 
+         degree $kd - (n+1)$.
+\Ensure  Polynomials $\gamma_i$ in the $L$-span of $B_i$, 
+         for $1 \leq i \leq n$, with  
+         $Q \Omega / P^k \equiv \gamma_{1} \Omega / P^{1} + \dotsb + \gamma_n \Omega / P^n$.
+\Procedure{Reduce}{$P, B_1, \dotsc, B_n, Q$}
+\While{$k \geq n+1$}
+\State $Q_0, \dotsc, Q_n \gets \Call{Decompose}{Q, \partial_0 P, \dotsc, \partial_n P, B_k}$
+\State $k \gets k-1$
+\State $Q \gets k^{-1} \sum_{i=0}^n \partial_i Q_i$
+\EndWhile
+\State $\gamma_{k+1}, \dotsc, \gamma_{n} \gets 0$
+\While{$Q \not \in B_k$}
+\State $Q_0, \dotsc, Q_n \gets \Call{Decompose}{Q, \partial_0 P, \dotsc, \partial_n P, B_k}$
+\State $\gamma_{k} \gets Q - \sum_{i=0}^n Q_i \partial_i P$
+\State $k \gets k-1$
+\State $Q \gets k^{-1} \sum_{i=0}^n \partial_i Q_i$
+\EndWhile
+\If{$Q \neq 0$}
+\State $\gamma_{k} \gets Q$
+\State $k \gets k-1$
+\EndIf
+\State $\gamma_{1}, \dotsc, \gamma_{k} \gets 0$
+\State \textbf{return} $\gamma_{1}, \dotsc, \gamma_n$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+% Subsection: Reduction of poles using linear algebra  %%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Reduction of poles using linear algebra}
+\label{sec:01-04-linalg}
+
+In this subsection, we specialise to the case of a smooth family of 
+projective hypersurfaces containing a diagonal fibre.  We exhibit a basis 
+of monomials $B_1 \cup \dotsb \cup B_n$ such that the corresponding set 
+$\cB_1 \cup \dotsb \cup \cB_n$ forms a basis for 
+$\HdR^n(\mathfrak{U}/\mathfrak{S})$ and re-express the problem of 
+decomposing a homogeneous polynomial from the previous section in the 
+language of linear algebra.  From this description, we furnish an 
+explicit reduction procedure in terms of matrices.  The approach is 
+based on a generalisation of Sylvester matrices from two polynomials to 
+$n+1$~polynomials, following Macaulay~\citep{Macaulay1994}.
+
+The decomposition problem from the previous section can be formulated as 
+follows:
+
+\begin{prob} \label{prob:Decomposition1}
+Given a homogeneous multivariate polynomial $Q \in L[x_0, \dotsc, x_n]$ 
+of degree \mbox{$k d - (n + 1)$}, for some $k \in \N$, we try to find 
+homogeneous polynomials $Q_0, \dotsc, Q_n$ in $L[x_0, \dotsc, x_n]$ such 
+that 
+\begin{equation} \label{eq:PDecomposition1}
+Q \equiv Q_0 \partial_0 P + \dotsb + Q_n \partial_n P
+\end{equation}
+modulo the $L$-span of $B_k$.
+\end{prob}
+
+\begin{rem}
+Immediately, we see that, for each $0 \leq i \leq n$, either $Q_i$ is 
+identically zero or has degree $(k - 1) d - n$ since $\partial_i P$ is 
+homogeneous of degree $d - 1$ and also the elements of $B_k$ have degree 
+$kd - (n+1)$.
+\end{rem}
+
+For the remaining part of this section we consider the following basis 
+sets~$B_k$, for $k \in \N$, which as before induce a generating set 
+$\cB_1 \cup \dotsb \cup \cB_n$ of $\HdR^n(\mathfrak{U}/\mathfrak{S})$ 
+as an $L$-vector space respecting the aforementioned filtration:
+
+\begin{defn} \label{defn:01-04-basis}
+For $k \in \N$, we define the following sets of monomials, 
+\begin{align*}
+F_k & = \{ x^i : i \in \mathbf{N}_{0}^{n+1}, \abs{i} = k d - (n+1) \}, \\
+B_k & = \{ x^i : i \in \mathbf{N}_{0}^{n+1}, \abs{i} = k d - (n+1) \text{ and $i_j < d-1$ for $0 \leq j \leq n$}\},
+\end{align*}
+where $x^i = x_0^{i_0} \dotsm x_n^{i_n}$ and 
+$\abs{i} = i_0 + \dotsb + i_n$.  Moreover, we let 
+$\cF_k$ denote the $L$-vector space spanned by the $n$-forms 
+$x^i \Omega / P^k$ for $x^i \in F_k$ and $\cB_k$ denote the 
+set of $n$-forms $x^i \Omega / P^k$ with $x^i \in B_k$.
+\end{defn}
+
+We shall defer the proof of the statement that the corresponding 
+set $\cB_1 \cup \dotsb \cup \cB_n$ indeed forms a basis of 
+$\HdR^n(\mathfrak{U}/\mathfrak{S})$, at least in the case when 
+the family of hypersurfaces given by~$P$ contains a diagonal fibre, 
+until the end of this section.
+
+\begin{rem}
+In order to ensure that our computations are not vacuous, we assume that 
+$\HdR^n(\mathfrak{U}/\mathfrak{S})$ is non-zero.  After setting 
+\begin{equation*}
+\ell = \ceil{\frac{n+1}{d}}, \quad u = \floor{\frac{(n+1)(d-1)}{d}} = n+1 - \ell,
+\end{equation*}
+we note that $B_k$ is non-empty if and only if $\ell \leq k \leq u$.  The 
+assumption is thus that $\ell \leq u$, which is equivalent to the statement 
+that $d \geq 2$ whenever $n$ is odd and $d \geq 3$ whenever $n$ is even.
+\end{rem}
+
+When considering Problem~\ref{prob:Decomposition1}, it turns out that, 
+when the family of hypersurfaces given by~$P$ contains a diagonal fibre, 
+we can place further restrictions on the polynomials $Q_0, \dotsc, Q_n$.  We 
+thus consider the following problem instead:
+
+\begin{prob} \label{prob:Decomposition2}
+Given a homogeneous multivariate polynomial $Q \in L[x_0, \dotsc, x_n]$ 
+of degree \mbox{$k d - (n + 1)$}, for some $k \in \N$, we try to find 
+homogeneous polynomials $Q_0, \dotsc, Q_n$ in $L[x_0, \dotsc, x_n]$ such 
+that 
+\begin{equation} \label{eq:PDecomposition2}
+Q \equiv Q_0 \partial_0 P + \dotsb + Q_n \partial_n P
+\end{equation}
+modulo the $L$-span of $B_k$.  Moreover, for each $1 \leq j \leq n$,  the 
+polynomial $Q_j$ may only contain non-zero coefficients for monomials of 
+degree $(k-1)d-n$ that are not divisible by any of the monomials 
+$x_0^{d-1}, \dotsc, x_{j-1}^{d-1}$.
+\end{prob}
+
+\begin{defn} \label{defn:IndexSets}
+For $k \in \N$, we define the following sets of monomials in 
+$L[x_0, \dotsc, x_n]$.  Let $R_k = F_k - B_k$ be the set of monomials of 
+total degree $kd-(n+1)$ and partial degree at least $d-1$ with respect to some 
+of the $n+1$ variables.  Let $C_k^{(0)}$ be the set of monomials of total 
+degree $(k-1)d - n$, and then inductively, for $j = 1, \dotsc, n$, define 
+$C_k^{(j)}$ to be the set of monomials in $C_k^{(j-1)}$ except for those 
+divisible by $x_{j-1}^{d-1}$.  Moreover, we define the multi-set $C_k$ as 
+the disjoint union of $C_k^{(0)}, \dotsc, C_k^{(n)}$.  We shall write an 
+element of this multi-set as $(j, g)$, referring to a monomial~$g$ 
+in~$C_k^{(j)}$.
+\end{defn}
+
+With this set-up, the following theorem provides a solution to 
+Problem~\ref{prob:Decomposition2} in the cases that we are interested in:
+
+\begin{thm} \label{thm:Isomorphism}
+Suppose that the family of smooth projective hypersurfaces given by the 
+polynomial~$P$ in $L[x_0, \dotsc, x_n]$ contains 
+a diagonal fibre.  For $k \in \N$ and $0 \leq j \leq n$, let $U_k^{(j)}$ be 
+the $L$-vector space of polynomials with basis $C_k^{(j)}$, and let $U_k$ 
+denote the cartesian product $U_k = U_k^{(0)} \times \dotsb \times U_k^{(n)}$. 
+Moreover, let $V_k$ and $W_k$ be the $L$-vector spaces of polynomials with 
+bases $F_k$ and $R_k$, respectively, and let $\pi \colon V_k \rightarrow W_k$ 
+denote the linear map that sends the elements of $B_k$ to zero and the 
+elements of $R_k$ to themselves.  Then the $L$-linear map 
+\begin{equation}
+\phi_k \colon U_k \to W_k, 
+(Q_0, \dotsc, Q_n) \mapsto \pi \bigl( Q_0 \partial_0 P + \dotsb + Q_n \partial_n P \bigr)
+\end{equation}
+is an isomorphism of $L$-vector spaces.
+\end{thm}
+
+\begin{proof}
+We first show that, for all $k \in \N$, the multi-sets $R_k$ and $C_k$ 
+have the same cardinality:
+
+We construct the following bijection $R_k \to C_k$, representing the 
+monomials by their exponent tuple.  Let $i = (i_0, \dotsc, i_n)$ be in 
+$R_k$.  If $i_0 \geq d-1$, we define the image as
+ $(i_0-d-1, i_1, \dotsc, i_n) \in C_k^{(0)}$.  More generally, if 
+$i_0 < d-1, \dotsc, i_{j-1} < d-1$ and $i_j \geq d-1$, the image is 
+$(i_0, \dotsc, i_{j-1}, i_j-d-1, i_{j+1}, \dotsc, i_n) \in C_k^{(j)}$.  
+It is easy to verify that this map is indeed a bijection.
+
+In order to establish that the map $\phi_k \colon U_k \to W_k$ is an 
+isomorphism of $L$-vector spaces, we now exhibit its matrix with respect to 
+the given basis:
+
+Let $k \in \N$ and suppose that $R_k$ and $C_k$ are non-empty, that is 
+to say, $k \geq n/d + 1$.  We define the auxiliary matrix $\Delta_k$ with 
+row and column index sets $R_k$ and $C_k$, respectively, as follows.  
+Given $f \in R_k$ and $(j,g) \in C_k$, we set the corresponding entry in 
+$\Delta_k$ to be the monomial coefficient of $f/g$ in $\partial_j P$ if 
+$g$ divides $f$ and $0$ otherwise.  It is immediate that $\Delta_k$ is the 
+matrix representing $\phi_k$ with respect to the bases $C_k$ and $R_k$ of 
+$U_k$ and $W_k$, respectively.
+
+The assumption that the family~$\mathfrak{X}$ of projective hypersurfaces 
+given by~$P$ contains a diagonal hypersurface means that for some~$t_0$ 
+the fibre $\mathfrak{X}_{t_0}$ is given by an equation of the form 
+\begin{equation*}
+P_{t_0}(x_0, \dotsc, x_n) = a_0 x_0^d + \dotsb a_n x_n^d = 0
+\end{equation*}
+with $a_0, \dotsc, a_n \in K^{\times}$.
+
+We aim to show that the determinant of $\Delta_k$ is non-zero in~$L$.  Since 
+the specialisation to the diagonal fibre viz.\ evaluation of the matrix at 
+$t = t_0$ commutes with computing the determinant, it suffices to show that 
+the determinant of $(\Delta_k) \big |_{t=t_0}$ is non-zero in~$K$.
+
+Since, for $0 \leq j \leq n$, 
+$\partial_j P_{t_0} (x_0, \dotsc, x_n) = d a_j x_j^{d-1}$, there is 
+precisely one non-zero entry in each column of $\Delta_k$.  Namely, in column 
+$(j, g) \in C_k$ and row $g x_j^{d-1} \in R_k$ there is the non-zero entry 
+$d \alpha_j$.  Thus, the determinant of $(\Delta_k) \big |_{t=t_0}$ is given 
+by the product of all its non-zero entries, which implies that it is non-zero, 
+concluding the proof.
+\end{proof}
+
+In principle, by including any of the numerous methods available for solving 
+linear equations, we are in a position to furnish a routine {\sc Decompose}, 
+which we formalise in Algorithm~\ref{alg:Decompose}.
+
+\begin{algorithm}[ht]
+\caption{Obtain co-ordinates for $Q$ in the Jacobian ideal modulo basis elements}
+\label{alg:Decompose}
+\begin{algorithmic}
+\Require \begin{compactitem}
+         \item $Q$ is a homogeneous polynomial of degree $kd - (n+1)$.
+         \item $\partial_0 P, \dotsc, \partial_n P$ are the partial 
+               derivatives of a homogeneous polynomial $P$ in 
+               $K[t][x_0, \dotsc, x_n]$ of degree $d$, which defines a smooth 
+               family of projective hypersurfaces containing a diagonal fibre, 
+               where $K$ is a field of characteristic zero.
+         \item $B_k$ is the set of all monomials of total degree $kd-(n+1)$ 
+               and partial degree less than $d-1$.
+         \end{compactitem}
+\Ensure  Homogeneous polynomials $Q_0, \dotsc, Q_n$ such that 
+         $Q \equiv Q_0 \partial P_0 + \dotsb + Q_n \partial_n P$ modulo the 
+         $K(t)$-span of $B_k$.
+\State  The multi-sets $R_k$ and $C_k$ are as in 
+        Definition~\ref{defn:IndexSets}, the matrix $\Delta_k$ is as in 
+        the proof of Theorem~\ref{thm:Isomorphism}.
+\Procedure{Decompose}{$Q, \partial_0 P, \dotsc, \partial_n P, B_k$}
+\State \begin{compactenum}[\it {Step} I.] \vspace{-1.24em}
+\item Let $b$ be the vector of length $\card{R_k}$ such that the entry 
+      corresponding to the monomial $x^i \in R_k$ is the coefficient of 
+      $x^i$ in $Q$.
+\item Let $v$ be the unique vector of length $\card{C_k}$ satisfying 
+      $\Delta_k v = b$.  From the description of $C_k$ as a disjoint union, 
+      we can write $v$ accordingly as $\bigl(v^{(0)}, \dotsc, v^{(n)}\bigr)$ 
+      where, for $0 \leq j \leq n$, $v^{(j)}$ is a vector of length 
+      $\cardts{C_k^{(j)}}$.
+\item For $j = 0, \dotsc, n$, set $Q_j = \sum_{g \in C_k^{(j)}} v_g^{(j)} g$,
+      where $v_g^{(j)}$ is the entry in $v^{(j)}$ corresponding to the 
+      monomial $g \in C_k^{(j)}$.
+\item \textbf{return} $Q_0, \dotsc, Q_n$
+\end{compactenum}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+We conclude this section by establishing that the set 
+$\cB_1 \cup \dotsb \cup \cB_n$ is indeed a basis for 
+$\HdR^n(\mathfrak{U}/\mathfrak{S})$, as claimed earlier, 
+using the reduction of poles procedure.
+
+\begin{thm} \label{thm:Basis}
+Suppose that the family of projective hypersurfaces given by~$P$ contains 
+a diagonal fibre.  Then the set $\cB_1 \cup \dotsb \cup \cB_n$ as in 
+Definition~\ref{defn:01-04-basis} is a basis for the $L$-vector space 
+$\HdR^n(\mathfrak{U}/\mathfrak{S})$.
+\end{thm}
+
+\begin{proof}
+We know that $\HdR^n(\mathfrak{U}/\mathfrak{S})$ is spanned 
+by the classes of the $n$-forms $Q \Omega / P^k$ for all 
+homogeneous polynomials~$Q$ of degree $kd-(n+1)$ and $k \in \N$.  
+By a theorem of Macaulay~\citep[\S 4, (4.11)]{Griffiths1969}, 
+we may assume that $1 \leq k \leq n$, that is to say, any class in 
+$\HdR^n(\mathfrak{U}/\mathfrak{S})$ can be represented by an 
+$n$-form with a pole of order at most~$n$.
+
+Without loss of generality, we may thus start the reduction of poles 
+procedure with a homogeneous polynomial $Q$ of degree $(n+1)d-(n+1)$.  Then, 
+since $B_{n+1} = \emptyset$ and $R_{n+1} = F_{n+1}$, 
+Theorem~\ref{thm:Isomorphism} shows that there exist homogeneous polynomials 
+$Q_0, \dotsc, Q_n$ either zero or homogeneous of degree $nd-(n+1)$ such that 
+$Q = Q_0 \partial_0 P + \dotsb + Q_n \partial_n P$.  Continuing with the 
+reduction of poles procedure as described in 
+Algorithm~\ref{alg:PoleReduction}, we obtain an expression for 
+$Q \Omega / P^{n+1}$ as an $L$-linear combination of elements in 
+$\cB_1 \cup \dotsb \cup \cB_n$.  This shows that this set spans the vector 
+space $\HdR^n(\mathfrak{U}/\mathfrak{S})$.
+
+To see that this set is linearly independent, note that it contains only 
+monomials whose partial degrees are strictly less than $d-1$.  However, since 
+$P$ is a homogeneous polynomial of degree $d$ and the family of hypersurfaces 
+contains a diagonal fibre, it follows that, for each $0 \leq i \leq n$, the 
+partial derivative $\partial_i P$ is a homogeneous polynomial of degree $d-1$ 
+and contains precisely one monomial term with partial degree equal to $d-1$, 
+namely that of the monomial $x_i^{d-1}$.  It follows that the elements of 
+$B_1 \cup \dotsb \cup B_n$ cannot be reduced further modulo the Jacobian 
+ideal and hence that the set $\cB_1 \cup \dotsb \cup \cB_n$ is linearly 
+independent.
+\end{proof}
+
+% Subsection:  Sparse matrix techniques  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Sparse matrix techniques}
+\label{sec:01-04-sparse}
+
+In this subsection we present a technique for repeatedly solving a sparse 
+system of linear equations as in {\it Step II.} of 
+Algorithm~\ref{alg:Decompose}.  The methods we present in this section are 
+discussed in great detail in a survey by Reid~\citep{Rei76}.
+
+Before continuing, let us briefly justify why spare matrix methods are 
+appropriate in this case:
+
+\begin{rem}
+Let $\tau$ and $\tau_0, \dotsc, \tau_n$ denote the number of non-zero 
+terms of the polynomials $P$ and $\partial_0 P, \dotsc, \partial_n P$, 
+respectively.  We observe that the auxiliary matrix $\Delta_k$ described in 
+the proof of Theorem~\ref{thm:Isomorphism} contains at most $\tau_j$ 
+non-zero entries in column $(j, g)$, since the non-zero entries in this column 
+are coefficients of the polynomial $\partial_j P$ corresponding to monomials 
+in $R_k$ via multiplication by $g$.  In particular, the number of non-zero 
+entries in the matrix is bounded above by $\tau \card{R_k}$.
+\end{rem}
+
+\begin{notation}
+In order to simplify the notation to what is relevant in this section, we 
+shall consider the system of linear equations given by 
+\begin{equation} \label{eq:LinearEquations}
+A x = b
+\end{equation}
+where $A$ is a non-singular $n \times n$ matrix over a field of characteristic 
+zero.  Moreover, for later reference we let $\tau$ denote the number of 
+non-zero entries in~$A$.
+\end{notation}
+
+Our first observation is that the reduction of poles procedure from the 
+previous section requires a linear system as in 
+equation~\eqref{eq:LinearEquations} to be solved multiple times for the same 
+matrix~$A$ but with different column vectors~$b$, which suggests using a 
+pre-processing approach such as $LUP$~decomposition.
+
+The $LUP$ decomposition of a matrix~$A$ is a way of performing the 
+classical Gaussian elimination with bookkeeping.  It consists of a 
+permutation matrix~$P$, a unit lower-triangular matrix~$L$ and an upper 
+triangular matrix~$U$ such that $PA = LU$.  Once these are known, the 
+original system can be solved in a two step process as
+\begin{equation}
+L y = P b, \quad U x = y
+\end{equation}
+which consists of two triangular systems.  We briefly note that, using a 
+classical dense approach~\citep{Cor90}, the $LUP$ decomposition can be 
+computed using a number cubic in $n$ of operations in the base field, and 
+that solving the two triangular systems only requires a number quadratic in 
+$n$ of operations in the base field.
+
+However, assuming that the matrix~$A$ is sparse, with further pre-processing 
+a much better performance can be realised.  As a first step, we permute the 
+rows of the matrix to ensure that the diagonal contains only non-zero entries.  
+We can achieve this here because we assume that the matrix is non-singular.  
+Effectively, this problem is the same as that of computing a perfect matching 
+in the $n \times n$ bipartite graph with vertex sets $\{v_i\}_{i=1}^n$ and 
+$\{w_i\}_{i=1}^n$, where an edge $v_i w_j$ is present if and only the element 
+$A_{ij}$ is non-zero.  If we find a perfect matching 
+$\{v_{\pi i} w_i\}_{i=1}^n$ in the form of a permutation $\pi \in S_n$, then, 
+after defining the permutation matrix $P_0$ via 
+\begin{equation}
+(P_0)_{ij} = \begin{cases} 1 & \text{if $j = \pi i$}, \\
+                           0 & \text{otherwise,} \end{cases}
+\end{equation}
+we conclude that $P_0 A$ has a zero-free diagonal.  A detailed discussion of 
+this problem together with an implementation can be found in the work of 
+Duff~\citep{Duf81a,Duf81b}.  We end our discussion here by quoting the 
+worst-case and experimental average-case complexity results as $\cO(\tau n)$ 
+and $\cO(\tau + n)$, respectively.
+
+The second step is to compute the block-triangularization of the 
+matrix~$P_0 A$.  We compute a permutation matrix $Q_0$ such that the matrix 
+$Q_0 P_0 A Q_0^t$ is block-triangular, that is, is of the form
+\begin{equation}
+Q_0 P_0 A Q_0^t = \begin{pmatrix}
+                  A^{(11)} &                   &          \\
+                  A^{(21)} & A^{(22)} &        &          \\
+                  \vdots   &          & \ddots &          \\
+                  A^{(N1)} & A^{(N2)} & \hdots & A^{(NN)}
+                  \end{pmatrix}
+\end{equation}
+where each diagonal block $A^{(kk)}$ is square and can itself not be 
+symmetrically permuted to block-triangular form.  Again an asymptotically 
+optimal algorithm for this problem stems from the realm of graphs:  it is 
+Tarjan's linear time algorithm for computing the strongly connected 
+components in a directed graph.  In this setting, its asymptotic complexity 
+is given by $\cO(n + \tau)$.  For further details, we refer to the joint 
+work of Duff and Reid~\citep{Duf78a,Duf78b}.
+
+Finally, this enables us to solve $N$ potentially much smaller systems of 
+linear equations instead of the one we started with.  We can rewrite our 
+original system of equations $Ax = b$ as $A' y = c$ where 
+$A' = Q_0 P_0 A Q_0^t$, $y = (Q_0^t)^{-1} x$ and $c = Q_0 P_0 b$ and now use 
+the fact that this system is block-triangular.  This allows us to instead 
+solve the sequence of systems of linear equations 
+\begin{equation}
+A^{(kk)} y_k = c_k - \sum_{j=1}^{k-1} A^{(kj)} y_j
+\end{equation}
+for $k = 1, \dotsc, N$, where we implicitly think of the column vectors $y$ 
+and $c$ to be divided into $N$ corresponding blocks $y_1, \dotsc, y_N$ and 
+$c_1, \dotsc, c_N$.  An important consequence of this approach is that after 
+the above two steps of pre-processing, the off-diagonal blocks are not changed 
+further;  in particular, the phenomenon of fill-in during Gaussian 
+elimination, which refers to the introduction of new non-zero entries, is 
+limited to the diagonal blocks.
+
+% Description of the algorithm  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Description of the algorithm}
+
+We now describe the action of the Gauss--Manin connection~$\nabla$ on 
+basis elements of $\HdR^n(\mathfrak{U}/\mathfrak{S})$.  Suppose that we are 
+given a basis element $x^i \Omega / P^k \in \cB_k$, where for 
+$1 \leq k \leq n$ the set $\cB_k$ is defined as in 
+Definition~\ref{defn:01-04-basis}.  Following the description in 
+Section~\ref{sec:01-04-hypersurfaces}, the action of the connection 
+is given by exterior differentiation, that is, differentiation with respect 
+to~$t$.  We first compute 
+\begin{equation*}
+\frac{d}{dt} \biggl(\frac{x^i \Omega}{P^k}\biggr) = \frac{-k x^i P_t \Omega}{P^{k+1}},
+\end{equation*}
+where $P_t = dP/dt$.  The second step is to repeatedly apply the reduction of 
+poles procedure in de~Rham cohomology in order to express the $n$-form above 
+as 
+\begin{equation*}
+\frac{d}{dt} \biggl(\frac{X^i \Omega}{P^k}\biggr) \equiv 
+    \frac{\gamma_{k+1} \Omega}{P^{k+1}} + \dotsb + \frac{\gamma_1 \Omega}{P}
+\end{equation*}
+where, for $1 \leq i \leq k+1$, $\gamma_i$ is an element in the $K(t)$-span 
+of~$B_i$.
+
+We formalise this for later reference in Algorithm~\ref{alg:ConnectionMatrix}.
+
+\begin{algorithm}
+\caption{Computing the Gauss--Manin connection matrix}
+\label{alg:ConnectionMatrix}
+\begin{algorithmic}
+\Require Homogeneous polynomial $P$ in $K[t][x_0, \dotsc, x_n]$ of degree $d$, 
+         defining a family of smooth projective hypersurfaces containing 
+         a diagonal fibre, where $K$ is a field of characteristic zero.
+\Ensure  Basis $B_1 \cup \dotsb \cup B_n$ for 
+         $\HdR^n(\mathfrak{U}/\mathfrak{S})$;  connection matrix~$M$ with 
+         respect to this basis.
+\Procedure{GMConnection}{$P$}
+\State \begin{compactenum}[\it {Step} I.] \vspace{-1.24em}
+\item Compute the partial derivatives $\partial_0 P, \dotsc, \partial_n P$ and 
+      the exterior derivative $dP/dt$.
+\item Compute the basis sets $B_1, \dotsc, B_n$.  In the following, we use the 
+      convenient way to index their union by $(i,f)$, referring to a 
+      polynomial $f \in B_i$.
+\item Compute the auxiliary matrices $\Delta_k$, for 
+      $k = \floor{n/d}+1, \dotsc, n+1$, and perform pre-processing on each 
+      auxiliary matrix as described in 
+      Sections~\ref{sec:01-04-linalg} 
+      and~\ref{sec:01-04-sparse}.
+\item For all $(j, g) \in \bigcup_{k=1}^n B_k$, let $Q = -j g P_t$ and set 
+      $\gamma_{1}, \dotsc, \gamma_n$ to the output of 
+      {\sc Reduce($P, B_1, \dotsc, B_n, Q$)}.  
+      Then, for each $(i, f) \in \bigcup_{k=1}^n B_k$, let $M_{(i,f),(j,g)}$ 
+      be the coefficient of $f$ in $\gamma_i$.
+\item \textbf{return} $B_1 \cup \dotsb \cup B_n$, $M$
+\end{compactenum}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+% Examples %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Examples}
+
+In this section, we present a few numerical examples.  In each 
+case, we include a comparison of the runtime and memory usage of 
+previously existing {\sc Magma} routines\footnotemark\ by Lauder 
+and our new implementation in~C.  Lauder's routines were executed 
+using {\sc Magma} version {2.15-12} on a departmental machine 
+comprising eight Dual Core AMD Opteron processors running at 2.2GHz 
+as well as 32GB of memory.  The author's new implementation was 
+run on the machine {\tt{wolverine.maths.ox.ac.uk}} featuring twenty-four 
+\mbox{Intel Xeon} processors running at~2.93GHz.  However, all 
+routines involved limit their use to a single processor.  We also note 
+that, for the smallest examples, the comparison of the memory requirements 
+is not fair in the sense that, even without executing user specific code, 
+the {\sc Magma} set-up required about 9.53MB of memory and therefore 
+only the excess of this should be attributed to Lauder's routines.
+
+\footnotetext{Specifically, we used the routines {\tt GriffithsRed-v1.4.m} 
+and {\tt ConnMatrix-v1.4.m}.}
+
+To begin with, the following Table~\ref{tab:01-04-Dimensions} illustrates the 
+numerical size of the problems we need to consider even for relatively small 
+dimensions and degrees.
+
+\begin{table}[h!]
+\begin{center}
+\caption{Dimensions of the graded parts of $\HdR^n(\mathfrak{U}/\mathfrak{S})$}
+\label{tab:01-04-Dimensions}
+\vspace{2mm}
+\begin{tabular}{@{}cccccccccccccc@{}} \toprule
+\multirow{2}{*}{$d$} &                & \multicolumn{12}{c}{$n$} \\ \cmidrule(r){3-14}
+                     &                & \multicolumn{3}{c}{2} & \multicolumn{4}{c}{3} & \multicolumn{5}{c}{4} \\ \midrule
+\multirow{3}{*}{3}   & $k$            & 1 & 2 & 3             & 1 & 2 & 3 & 4         & 1 & 2 & 3 & 4 & 5 \\
+                     & $\card{\cB_k}$ & 1 & 1 & 0             & 0 & 6 & 0 & 0         & 0 & 5 & 5 & 0 & 0 \\
+                     & $\rank \cF_k$  & 1 & 10 & 28           & 0 & 10 & 56 & 165     & 0 & 5 & 70 & 330 & 1001 \\ \midrule
+\multirow{3}{*}{4}   & $k$            & 1 & 2 & 3             & 1 & 2 & 3 & 4         & 1 & 2 & 3 & 4 & 5 \\
+                     & $\card{\cB_k}$ & 3 & 3 & 0             & 1 & 19 & 1 & 0        & 0 & 30 & 30 & 0 & 0 \\
+                     & $\rank \cF_k$  & 3 & 21 & 55           & 1 & 35 & 165 & 455    & 0 & 35 & 330 & 1365 & 3876 \\ \midrule
+\multirow{3}{*}{5}   & $k$            & 1 & 2 & 3             & 1 & 2 & 3 & 4         & 1 & 2 & 3 & 4 & 5 \\
+                     & $\card{\cB_k}$ & 6 & 6 & 0             & 4 & 44 & 4 & 0        & 1 & 101 & 101 & 1 & 0 \\
+                     & $\rank \cF_k$  & 6 & 36 & 91           & 4 & 84 & 364 & 969    & 1 & 126 & 1001 & 3876 & 10626 \\ \bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsection{A toy example}
+
+We begin by giving many details of the computation in the case of the toy 
+example given by $P(X,Y,Z) = X^3 + Y^3 + Z^3 + t XYZ$, containing the 
+diagonal and only one varying cross-term, which is symmetric in all 
+variables.
+
+After computing the derivatives, we find that $\ell = 1$ and $u = 2$, and 
+hence compute the basis sets $B_1 = \{1\}$ and $B_2 = \{XYZ\}$.
+
+The auxiliary matrix $\Delta_2$ is computed as 
+\begin{equation*}
+\renewcommand{\arraystretch}{0.68}
+\begin{pmatrix}
+3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 3 & 0 & 0 & 0 & 0 & t & 0 & 0 \\
+0 & 0 & 0 & 3 & 0 & 0 & 0 & t & 0 \\
+0 & 0 & 0 & 0 & 3 & 0 & 0 & 0 & 0 \\
+0 & 0 & 3 & t & 0 & 0 & 0 & 0 & 0 \\
+0 & t & 0 & 0 & 0 & 3 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & t & 3 & 0 & 0 \\
+0 & 0 & t & 0 & 0 & 0 & 0 & 3 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 3
+\end{pmatrix}
+\end{equation*}
+but in this initial form it still has three zero entries on the diagonal.  
+The permutation~$P_0$ such that $P_0 A$ has a zero-free diagonal is given 
+by the cycle $(3~5~4)$.  The subsequent permutation to block-triangular 
+form is given by $(2~6~4)(3~7)(5~8)$.  Together they transform $\Delta_2$ 
+to $Q_0 P_0 \Delta_2 Q_0^t$ which is 
+\begin{equation*}
+\renewcommand{\arraystretch}{0.68}
+\begin{pmatrix}
+3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 3 & 0 & t & 0 & 0 & 0 & 0 & 0 \\
+0 & t & 3 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & t & 3 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 3 & 0 & t & 0 & 0 \\
+0 & 0 & 0 & 0 & t & 3 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & t & 3 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 3 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 3
+\end{pmatrix}.
+\end{equation*}
+The above matrix is block-triangular with block sizes $1, 3, 3, 1, 1$. 
+The following $LUP$ decomposition performed on the two $3 \times 3$ 
+submatrices yields the matrix
+\begin{equation*}
+\renewcommand{\arraystretch}{0.68}
+\begin{pmatrix}
+3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 3 & 0 & t & 0 & 0 & 0 & 0 & 0 \\
+0 & t/3 & 3 & -t^2/3 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & t/3 & (t^3+27)/9 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 3 & 0 & t & 0 & 0 \\
+0 & 0 & 0 & 0 & t/3 & 3 & -t^2/3 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & t/3 & (t^3+27)/9 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 3 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 3
+\end{pmatrix}.
+\end{equation*}
+
+We do not include full details for the computation of $\Delta_3$, which is a 
+$28 \times 28$ matrix.  However, in order to illustrate the usefulness of 
+applying sparse rather then dense matrix techniques, we point out that the 
+corresponding block sizes partition $28$ as $19 \times 1 + 3 \times 3$.
+
+In order to compute the Gauss--Manin connection matrix with respect to our 
+choice of basis, we need to reduce the two elements $- XYZ \Omega / P^2$ and 
+$-2 X^2 Y^2 Z^2 \Omega / P^3$ corresponding to the basis elements $\Omega / P$ 
+and $XYZ \Omega / P^2$, respectively.  This gives 
+\begin{align*}
+\nabla \Bigl( \frac{\Omega}{P} \Bigr) & = \frac{- XYZ \Omega}{P}, \\
+\nabla \Bigl( \frac{XYZ \Omega}{P^2} \Bigr) & = \frac{-2 X^2 Y^2 Z^2 \Omega}{P^3} \equiv \frac{t/(t^3+27) \Omega}{P} + \frac{-3t^2/(t^3+27) \Omega}{P^2}.
+\end{align*}
+
+Finally, the runtime and memory requirements of the {\sc Magma} routines 
+and the new C implementation are given by 0.0035s and 0.00017s as well as 
+7.32MB and 136KB, respectively.
+
+\subsection{Quartic surfaces}
+
+We now consider a sequence of quartic surfaces with an increasing number of 
+cross-terms.  This highlights the practical limitations of the previous 
+{\sc Magma} code and demonstrates the usefulness of the approach investigated 
+in this thesis.
+
+From Table~\ref{tab:01-04-Dimensions} we see that $\card{B_1} = 1$, 
+$\card{B_2} = 19$, $\card{B_3} = 1$ and $\card{\cR_2} = 16$, 
+$\card{\cR_3} = 164$, $\card{\cR_4} = 455$.  We are particularly interested in 
+how these last three cardinalities are partitioned by the 
+block-triangularisation since this provides a measure of the usefulness of the 
+sparse matrix techniques employed here.  For a partition of the matrix 
+$\Delta_k$ into $N_k$ diagonal blocks of size $n_1, \dotsc, n_{N_k}$, we 
+include the two quantities 
+$\alpha_k = \card{\cR_k}^2 / (n_1^2 + \dotsb + n_{N_k}^2)$ and 
+$\beta_k = \card{\cR_k}^3 / (n_1^3 + \dotsb + n_{N_k}^3)$, rounded to the 
+nearest integer.  These two quantities give an indication of the improvement 
+in runtime gained by employing sparse matrix techniques instead of standard 
+dense matrix techniques.  The former value pertains to the quadratic time 
+routines, which in particular includes the solving of linear systems as part 
+of the reduction process, whereas the latter is relevant for the $LUP$ 
+decomposition, which in the current implementation requires cubic time.
+
+\subsubsection{A quartic surface with one cross-term}
+
+We consider the family of surfaces given by 
+\begin{equation*}
+W^4 + X^4 + Y^4 + Z^4 + t W X Y Z.
+\end{equation*}
+The partitions we obtain are $16 = 16 \times 1$, 
+$164 = 104 \times 1 + 15 \times 4$ and $455 = 391 \times 1 + 16 \times 4$, 
+which yield values $\alpha = (\alpha_k)_{k=1}^3 = (16,78,319)$ and 
+$\beta = (\beta_k)_{k=1}^3 = (256,4145,66570)$.
+
+As expected from the small number of terms and high level of symmetry, both 
+Lauder's {\sc Magma} routine and the new implementation compute this quickly 
+in 0.045s and 0.008s, requiring 7.71MB and 1.35MB of memory, respectively.
+
+We also note that Gerkmann~\citep[\S 7.5]{Gerkmann2007} mentions a runtime of 
+about 7s in this case.
+
+\subsubsection{A quartic surface with three cross-terms}
+
+We consider the family of surfaces given by 
+\begin{equation*}
+W^4 + X^4 + Y^4 + Z^4 + t (W^3 X + W Y Z^2 + X Z^3).
+\end{equation*}
+The block sizes give rise to partitions $16 = 16 \times 1$, 
+$164 = 70 \times 1 + 8 \times 4 + 1 \times 62$ and 
+$455 = 253 \times 1 + 33 \times 4 + 1 \times 70$, from which we find 
+$\alpha = (16,6,36)$ and $\beta = (256,18,273)$.
+
+The time requirements for the two routines are 27.88s and 0.82s, and the 
+space requirements are 18.84MB and 5.29MB, respectively.  In particular, 
+the new routine is about 34~times faster.
+
+\subsubsection{A quartic surface with four cross-terms}
+
+We consider the family of surfaces given by 
+\begin{equation*}
+W^4 + X^4 + Y^4 + Z^4 + t (W^3 X + W Y Z^2 + X Z^3 + W X Y Z).
+\end{equation*}
+The partitions we obtain are $16 = 16 \times 1$, 
+$164 = 53 \times 1 + 4 \times 4 + 1 \times 95$ and 
+$455 = 231 \times 1 + 29 \times 4 + 1 \times 108$.  This gives 
+$\alpha = (16,3,17)$ and $\beta = (256,5,75)$.
+
+The time and space requirements for the two routines are 4190.610s, 8.01s and 
+238.38MB, 16.62MB.  At this point, the new implementation is already more 
+than 532~times faster.
+
+\subsubsection{A quartic surface with six cross-terms}
+
+We consider the family of surfaces given by
+\begin{equation*}
+W^4 + X^4 + Y^4 + Z^4 + t (2 W^3 X + 7 W^2 X Y - 11 W X^2 Y + 13 X^2 Y Z + 17 X^2 Z^2 - W X Y Z).
+\end{equation*}
+The block-triangularisations result in the following partitions of the ranks 
+of the auxiliary matrices:  $16 = 14 \times 1 + 1 \times 2$, 
+$164 = 38 \times 1 + 4 \times 2 + 4 \times 4 + 1 \times 102$ and 
+$455 = 181 \times 1 + 18 \times 2 + 22 \times 4 + 7 \times 5 + 1 \times 115$. 
+We hence find that $\alpha = (14,3,15)$ and $\beta = (186,4,62)$.
+
+For this example, Lauder's {\sc Magma} routine takes 4.52 days and requires 
+3.57GB of memory.  The new implementation completes the computation in 
+49.47s and uses 66.7MB.  That is, the new implementation is more than 
+7894~times faster.
+
+\subsubsection{A quartic surface with seven cross-terms}
+
+We consider the family of surfaces given by
+\begin{multline*}
+W^4 + X^4 + Y^4 + Z^4 + t (-3 W^3 X + 5 W^3 Y + 7 W^2 X Y \\ 
+                           - 23 W X^2 Y - 29 X^2 Y Z + 31 Y^2 Z^2 - 37 W X Y Z)
+\end{multline*}
+In this case, we obtain the partitions $16 = 14 \times 1 + 1 \times 2$, 
+$164 = 32 \times 1 + 1 \times 4 + 1 \times 128$ and 
+$455 = 152 \times 1 + 15 \times 4 + 3 \times 28 + 1 \times 159$ and 
+values $\alpha = (14,2,7)$ and $\beta = (186,2,23)$.
+
+The previous {\sc Magma} routine solved this example in 34.04 days using 
+12.5GB of memory.  In contrast to this, the runtime of the new C 
+implementation has only doubled when compared to the previous example and is 
+117.32s, with a memory requirement of 126.5MB.
+
+\subsection{A quintic surface}
+
+We finally give an example which begins to show limitations of the approach 
+discussed in this work:
+\begin{equation*}
+(1-t) (W^5 + X^5 + Y^5 + Z^5) + t \bigl((W X Z + Y^3) (W^2 + X Y + Z^2)\bigr).
+\end{equation*}
+For this example, the new implementation requires about 31.27~minutes and 
+979.5MB.  The author did not obtain the corresponding data from Lauder's 
+{\sc Magma} routine since it was terminated after running for over 34~days and 
+using nearly 5GB of memory.
+
+% Further remarks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Further remarks}
+
+We remark that we have restricted our computations to families~$X$ 
+defined over the prime field~$\mathbf{F}_p$, with lifts~$\mathcal{X}$ 
+defined by a polynomial $P \in \mathbf{Z}[t][x_0,\dotsc,x_n]$ over 
+the integers.  Thus, the computation of the connection takes place 
+over the field of rational functions~$\mathbf{Q}(t)$.  We note that 
+our implementation using exact arithmetic demonstrates a significant 
+improvement over previous work already.  However, as part of the 
+deformation method, we only require a $p$-adic approximation of the 
+connection matrix.  Further practical improvements should be possible 
+by developing an implementation that precomputes the Macaulay resultant 
+$r(t) \in \mathbf{Z}[t]$ and then performs arithmetic operations 
+in~$\mathbf{Q}_p[t, r(t)^{-1}]$ to finite $p$-adic precision.
+

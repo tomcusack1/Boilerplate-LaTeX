@@ -1,0 +1,215 @@
+% Chapter:  Introduction to point counting  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Varieties over finite fields and zeta functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Varieties over finite fields and zeta functions}
+
+Let $X$ denote an algebraic variety over the finite field~$\mathbf{F}_q$ 
+with $q = p^a$ elements.  In particular, $X$ is also defined 
+over every algebraic extension $\mathbf{F}_{q^i}$, for $i \geq 0$, 
+and we can let $N_i = \abs{ X(\mathbf{F}_{q^i}) }$ denote the number 
+of points of $X$ over $\mathbf{F}_{q^i}$.  The \emph{zeta function} 
+of $X$ is then defined as the formal power series in $\mathbf{Q}[[T]]$,
+\begin{equation*}
+Z(X, T) = \exp \Bigl( \sum_{i=0}^{\infty} \frac{N_i T^i}{i} \Bigr).
+\end{equation*}
+In the above form, the power series~$Z(X, T)$ is represented by an 
+infinite series and it is unclear whether this can be explicitly 
+computed by an algorithm viz.\ a \emph{finite} routine.  This issue 
+was resolved by Dwork~\citep{Dwork1960} in 1960:
+
+\begin{thm}
+Let $X$ be an algebraic variety over the finite field~$\mathbf{F}_q$.  
+Then the zeta function $Z(X, T)$ is a quotient of two polynomials with 
+integer coefficients.
+\end{thm}
+
+Moreover, Bombieri~\citep{Bombieri1978} provided an explicit bound 
+for the total degree of the rational function representing $Z(X, T)$.
+This implies that we can, at least in principle, compute the zeta 
+function by computing a finite number of the quantities $N_i$ by 
+directly enumerating the points $\abs{X\bigl(\mathbf{F}_{q^i}\bigr)}$.
+Dwork's theorem is included in a group of results known as the 
+\emph{Weil conjectures}, statements conjectured by Weil~\citep{Weil1949} 
+in~1949 which have subsequently been proved by Dwork, Grothendieck, 
+Deligne, et al.\ (see~\citep[Appendix~C]{Har77}).  We follow 
+Kedlaya~\citep[Theorem~1.2.1]{Kedlaya2011} in the statement of the Weil 
+conjectures:
+
+\begin{thm} \label{thm:01-Zetafunctions}
+Let $X$ be a separated scheme of finite type over the finite 
+field~$\mathbf{F}_q$.  Then the zeta function of~$X$ is the power series 
+representation of a rational function~$T$.  Moreover, if $X$ is smooth 
+and proper over~$\mathbf{F}_q$, then there is a unique way to write 
+\begin{equation}
+Z(X, T) = \prod_{i=0}^{2 \dim(X)} P_i(T)^{(-1)^{i+1}}
+\end{equation}
+for some polynomials $P_i(T) \in \mathbf{Z}[T]$ with $P_i(0) = 1$, 
+satisfying the following conditions.
+\begin{enumerate}
+\item We have 
+\begin{equation*}
+P_i(q^{-i} / T) = \pm q^{-i \deg(P_i) / 2} T^{- \deg(P_i)} P_i(T),
+\end{equation*}
+with the sign being $+$ whenever $i$ is odd.  In other words, the roots 
+of~$P_i$ are invariant under the map $r \mapsto q^{-i} / r$, and if $i$ 
+is odd then the multiplicities of $\pm q^{-i/2}$ are even.
+\item The complex roots of $P_i$ all have absolute value $q^{-i/2}$.
+\item If $X \cong \mathfrak{X}_{\mathbf{F}_q}$ for some smooth proper 
+scheme~$\mathfrak{X}$ over the local ring $R = \mathfrak{o}_{K,\mathfrak{p}}$, 
+for some number field~$K$ and some prime ideal~$\mathfrak{p}$ of 
+$\mathfrak{o}_K$ with residue field~$\mathbf{F}_q$, then for any 
+embedding~$K \into \mathbf{C}$, 
+\begin{equation*}
+\deg(P_i) = \dim_{\mathbf{C}} H^{i} \bigl( (\mathfrak{X} \times_R \mathbf{C})^{\text{an}}, \mathbf{C} \bigr).
+\end{equation*}
+In other words, $\deg(P_i)$ equals the $i$-th Betti number of 
+$\mathfrak{X} \times_{R} \mathbf{C}$.
+\end{enumerate}
+\end{thm}
+
+A discussion of the proof of this theorem is significantly 
+beyond the scope of this thesis.  As a starting point for 
+further details, we refer the reader to 
+Hartshorne~\citep[Appendix~C]{Har77} and Osserman~\citep{Osserman2008}.
+
+Dwork's theorem on the rationality of the zeta function implies 
+that $Z(X, T)$ is already defined by a finite initial segment of 
+the sequence~$(N_i)_{i \geq 0}$.  In particular, the problem of 
+computing the zeta function can be formulated as follows:
+
+\begin{prob} \label{prob:dm-pointcounting}
+Given an algebraic variety~$X$ defined by a finite list of 
+multivariate polynomials in~$\mathbf{F}_{q}[x_0, \dotsc, x_n]$, 
+efficiently compute the rational function in~$\mathbf{Q}(T)$ 
+representing $Z(X, T)$.
+\end{prob}
+
+% Point counting algorithms %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Point counting algorithms}
+
+Computational routines addressing Problem~\ref{prob:dm-pointcounting} are 
+known as \emph{point counting} algorithms.  Perhaps the most naive approach 
+is to explicitly exhibit the points of~$X$ over~$\mathbf{F}_{q^i}$ by an 
+exhaustive search for sufficiently many $i \geq 0$, determining $Z(X, T)$.  
+For example, in the case of an elliptic curve~$E$ over a finite 
+field~$\mathbf{F}_{q}$, the zeta function is given by 
+\begin{equation*}
+Z(E, T) = \frac{1 - a_q T + q T^2}{(1 - T)(1 - q T)}
+\end{equation*}
+where $a_q = q + 1 - \abs{E(\mathbf{F}_{q})}$.  However, this 
+approach is only feasible for the smallest of instances of 
+Problem~\ref{prob:dm-pointcounting}.  More sophisticated algorithms 
+have been developed, and we refer the reader to surveys by 
+Chambert-Loir~\citep{ChambertLoir2008} on point counting algorithms 
+in general and Kedlaya~\citep{Kedlaya2004} on $p$-adic methods in 
+particular.  In the following, we only mention a few different approaches.
+
+In~1985, Schoof~\citep{Schoof1985} proposed an $\ell$-adic algorithm for 
+computing the zeta function of an elliptic curve~$E$.  The main idea behind 
+this approach is to compute the trace~$a_q \bmod{\ell}$ of the Frobenius 
+endomorphism on $\Het^{1}(E, \mathbf{F}_{\ell})$ for sufficiently 
+many primes~$\ell$ and then determine the integer~$a_q$ using the Chinese 
+remainder theorem.  Schoof's algorithm has subsequently been improved by 
+Atkin~\citep{Atkin1988,Atkin1992} and Elkies~\citep{Elkies1998}, 
+leading to a practical algorithm with runtime polynomial in $\log q$.  
+It has also been generalised, for example to higher genus curves by 
+Pila~\citep{Pila1990}, however, the runtime of these algorithms remains 
+exponential in the genus.
+
+Another group of algorithms applicable primarily to elliptic curves 
+is based on the \emph{canonical lift} of a curve from~$\mathbf{F}_{q}$ 
+to the ring~$\mathbf{Z}_{q}$, which is the ring of integers of the 
+unique unramified extension of $\mathbf{Q}_{p}$ with residue field 
+$\mathbf{F}_{q}$.  The first of these algorithms is Satoh's 
+method~\citep{Satoh2000} presented in~2000, which has runtime 
+polynomial in the extension degree~$\log_{p} q$ but linear in the prime~$p$.
+
+Finally, there is a class of so-called $p$-adic algorithms based on 
+Kedlaya's algorithm~\citep{Kedlaya2001}, which directly computes a 
+$p$-adic approximation to the action of Frobenius on the rigid cohomology 
+spaces associated to hyperelliptic curves in odd characteristic.  
+For a fixed prime~$p$, the runtime of Kedlaya's original algorithm 
+is polynomial in the extension degree~$\log_{p} q$ and the genus~$g$.  
+However, there have been a number of improvements.  Harvey~\citep{Harvey2007} 
+improved the roughly linear dependence on the prime from~$p$ to $\sqrt{p}$.  
+Denef and Vercauteren~\citep{DenVer2006} included the case $p = 2$, and 
+Castryck, Denef and Vercauteren~\citep{CasDenVer2006} extended the algorithm 
+to so-called nondegenerate curves.
+
+Lauder's \emph{deformation method} presented in~\citep{Lau04a} 
+applies to smooth projective hypersurfaces, additionally making use 
+of the theory of deformation due to Dwork~\citep{Dwork62b}.  The 
+runtime of this algorithm is polynomial in the prime~$p$, the 
+extension degree~$\log_{p} q$, and the genus~$g$.  Subsequently, 
+Gerkmann~\citep{Gerkmann2007} improved a number of $p$-adic bounds 
+and developed a better implementation.  Moreover, the practicality 
+of the deformation method has also been demonstrated for various 
+classes of curves.  Hubrechts~\citep{Hubrechts2007, Hubrechts2008} 
+used this algorithm to compute the zeta function of hyperelliptic curves, 
+Castryck, Hubrechts and Vercauteren~\citep{CasHubVer2008} considered 
+a slightly more general class of $C_{a,b}$-curves, and 
+Tuitman~\citep{Tuitman2011} extended this work to nondegenerate curves. 
+
+Finally, we mention Lauder's \emph{fibration method} introduced 
+in~\citep{Lauder2006}, which proceeds recursively on the dimension 
+of a hypersurface.  This approach has been developed further 
+by Walker~\citep{Walker2009}.
+
+% This thesis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{This thesis}
+
+We present our results pertaining to the main goal of this thesis in 
+Part~{I}, which is to demonstrate the practicality of Lauder's deformation 
+method for a wide class of smooth projective hypersurfaces.  We build on 
+the work of Lauder~\citep{Lau04a} and Gerkmann~\citep{Gerkmann2007}, 
+resolving bottlenecks in previous computations by employing both theoretical 
+advances as well as improved implementation details.  
+In Chapter~\ref{ch:01-DMIntro}, we provide an overview of the deformation 
+method and briefly revisit some of the underlying theoretical machinery 
+and results.  As there are no original contributions in this chapter we 
+omit many technical details and do not include any proofs.  
+The deformation method relies on the computation of the action of 
+Frobenius on a fibre in the family of hypersurfaces for which 
+this computation is easy and we address this issue in 
+Chapter~\ref{ch:01-DiagFrob}.  We present 
+a novel algorithmic approach in the case of diagonal hypersurfaces, 
+which is vastly superior to previous computations in practice, together 
+with complementing theoretical results and a complexity analysis.
+In Chapter~\ref{ch:GMConnection}, we consider another major step in the 
+deformation method, namely the computation of the Gauss--Manin connection 
+matrix.  Existing implementations~\citep{Lau04a,Gerkmann2007,Kedlaya2011} 
+make use of Gr\"obner base computations for rational functions in order 
+to carry out effective computations in de~Rham cohomology spaces, which 
+leads to poor practical performance and limits the deformation method to 
+hypersurfaces defined by sparse polynomials.  We reduce the impact 
+of this step by treating it as an explicit finite-dimensional linear 
+algebra problem.  We collect the remaining steps of the deformation 
+method in Chapter~\ref{ch:01-Main}  as we do not present any original 
+theoretical contributions.  Our practical improvements are due to 
+theoretical advances by Kedlaya and Tuitman~\citep{KedlayaTuitman2012} 
+and improved implementation details.  Finally, we present a number of 
+examples in Chapter~\ref{ch:01-Exmp}, hoping to convince the reader of 
+the practical relevance of this work.  In particular, in 
+Section~\ref{sec:06-GenericQuarticSurface} we demonstrate that we can 
+compute the zeta function of an arbitrary smooth projective quartic 
+surface over a finite field of small characteristic in a matter of hours.
+
+In Part~{II}, we present a constant factor improvement to the 
+radix conversion of polynomials, which is a key step and the 
+main bottleneck in current implementations~\citep{Lauder2006,Walker2009} 
+of Lauder's fibration method.  Our brief review of the problem 
+in Chapter~\ref{ch:02-Intro} is followed by a presentation of suitable 
+algorithms in Chapter~\ref{ch:02-Algorithms}.  We observe a vast 
+practical improvement when reconsidering an example due to Lauder 
+in Chapter~\ref{ch:02-Exmp}.
+
+The practical improvements that we have observed in the first part of 
+this thesis rely on an efficient implementation of the underlying 
+$p$-adic arithmetic, which we address in Part~{III}.  In fact, we 
+go beyond treating merely the functions utilised in the deformation 
+method and develop a complete module for unramified $p$-adic arithmetic, 
+which we have implemented in the C library {\sc FLINT}~\citep{FLINT}.
+

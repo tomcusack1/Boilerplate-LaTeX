@@ -1,0 +1,298 @@
+\providecommand{\bysame}{\leavevmode\hbox to3em{\hrulefill}\thinspace}
+\providecommand{\MR}{\relax\ifhmode\unskip\space\fi MR }
+% \MRhref is called by the amsart/book/proc definition of \MR.
+\providecommand{\MRhref}[2]{%
+  \href{http://www.ams.org/mathscinet-getitem?mr=#1}{#2}
+}
+\providecommand{\href}[2]{#2}
+\begin{thebibliography}{10}
+
+\bibitem{AbbottKedlayaRoe2006}
+T.~Abott, K.~S. Kedlaya, and D.~Roe, \emph{Bounding {Picard} numbers of
+  surfaces using $p$-adic cohomology}, Arithmetic, Geometry, and Coding Theory
+  {(AGCT-10)}, 2006.
+
+\bibitem{Atkin1988}
+A.~Atkin, \emph{The number of points on an elliptic curve modulo a prime,
+  draft}, 1988.
+
+\bibitem{Atkin1992}
+\bysame, \emph{The number of points on an elliptic curve modulo a prime (ii).
+  draft}, 1992.
+
+\bibitem{Bac96}
+E.~Bach and J.~Shallit, \emph{Algorithmic number theory, vol. 1: Efficient
+  algorithms ({F}oundations of {C}omputing)}, {MIT Press}, 1996.
+
+\bibitem{BalChi94}
+F.~Baldassarri and B.~Chiarellotto, \emph{Algebraic versus rigid cohomology
+  with logarithmic coefficients}, {B}arsotti Symposium in Algebraic Geometry,
+  Perspectives in Mathematics, vol.~15, 1995, pp.~11--50.
+
+\bibitem{Bernstein2008}
+D.~J. Bernstein, \emph{Fast multiplication and its applications}, Algorithmic
+  number theory: lattices, number fields, curves and cryptography, Math. Sci.
+  Res. Inst. Publ., vol.~44, Cambridge Univ. Press, Cambridge, 2008,
+  pp.~325--384.
+
+\bibitem{Berthelot1986}
+P.~Berthelot, \emph{G\'eom\'etrie rigide et cohomlogie des vari\'et\'es
+  alg\'ebriques de caract\'eristique~{$p$}}, M\'emoires de la S.~M.~F.
+  \textbf{2} (1986), no.~23, 7--32.
+
+\bibitem{Bombieri1978}
+E.~Bombieri, \emph{On exponential sums in finite field~{II}}, Invent.\ Math.
+  \textbf{47} (1978), 29--39.
+
+\bibitem{Magma}
+W.~Bosma, J.~Cannon, and C.~Playoust, \emph{The {M}agma algebra system.
+  {I}.~{T}he user language}, J. Symbolic Comput. \textbf{24} (1997), no.~3-4,
+  235--265, Computational algebra and number theory (London, 1993).
+
+\bibitem{Brent1976}
+R.~P. Brent, \emph{The complexity of multiple-precision arithmetic}, The
+  Complexity of Computational Problem Solving (R.~Anderssen and R.~Brent,
+  eds.), University of Queensland Press, 1976, pp.~126--165.
+
+\bibitem{BrentKung1978}
+R.~P. Brent and H.~Kung, \emph{Fast algorithms for manipulating formal power
+  series}, J.~{ACM} \textbf{25} (1978), no.~4, 581--595.
+
+\bibitem{CasDenVer2006}
+W.~Castryck, J.~Denef, and F.~Vercauteren, \emph{Computing zeta functions of
+  nondegenerate curves}, IMRP Int. Math. Res. Pap. (2006), Art. ID 72017, 57.
+
+\bibitem{CasHubVer2008}
+W.~Castryck, H.~Hubrechts, and F.~Vercauteren, \emph{Computing zeta functions
+  in families of {$C_{a,b}$} curves using deformation}, Algorithmic number
+  theory, Lecture Notes in Comput. Sci., vol. 5011, Springer, Berlin, 2008,
+  pp.~296--311.
+
+\bibitem{ChambertLoir2008}
+A.~Chambert-Loir, \emph{Compter (rapidement) le nombre de solutions
+  d'\'equations dans les corps finis}, Ast\'erisque (2008), no.~317, Exp. No.
+  968, vii, 39--90, S{\'e}minaire Bourbaki. Vol. 2006/2007.
+
+\bibitem{Clark66}
+D.~Clark, \emph{A note on the $p$-adic convergence of solutions of linear
+  differential equations}, Proc.\ Amer.\ Math.\ Soc. \textbf{17} (1966),
+  262--269.
+
+\bibitem{Coh93}
+H.~Cohen, \emph{A course in computational algebraic number theory}, Springer,
+  1993.
+
+\bibitem{HEHCC2005}
+H.~Cohen and G.~Frey (eds.), \emph{Handbook of elliptic and hyperelliptic curve
+  cryptography}, CRC Press, 2005.
+
+\bibitem{CoppersmithWinograd1990}
+D.~Coppersmith and S.~Winograd, \emph{Matrix multiplication via arithmetic
+  progressions}, J.\ {S}ymb.\ {C}omput. \textbf{9} (1990), no.~3, 251--280.
+
+\bibitem{Cor90}
+T.~H. Cormen, C.~H. Leiserson, and R.~L. Rivest, \emph{Introduction to
+  algorithms}, {MIT Press}, Cambridge, Massachusetts, 1990.
+
+\bibitem{DenVer2006}
+J.~Denef and F.~Vercauteren, \emph{An extension of {K}edlaya's algorithm to
+  hyperelliptic curves in characteristic 2}, J. Cryptology \textbf{19} (2006),
+  no.~1, 1--25.
+
+\bibitem{Duf81b}
+I.~Duff, \emph{Algorithm 575: Permutations for a zero-free diagonal}, ACM
+  Trans. Math. Softw. \textbf{7} (1981), no.~3, 387--390.
+
+\bibitem{Duf81a}
+\bysame, \emph{On algorithms for obtaining a maximum transversal}, ACM Trans.
+  Math. Softw. \textbf{7} (1981), no.~3, 315--330.
+
+\bibitem{Duf78b}
+I.~Duff and J.~Reid, \emph{Algorithm 529: Permutations to block triangular form
+  [{F1}]}, ACM Trans. Math. Softw. \textbf{4} (1978), no.~2, 189--192.
+
+\bibitem{Duf78a}
+\bysame, \emph{An implementation of {Tarjan's} algorithm for the block
+  triangularization of a matrix}, ACM Trans. Math. Softw. \textbf{4} (1978),
+  no.~2, 137--147.
+
+\bibitem{Dwork1960}
+B.~Dwork, \emph{On the rationality of the zeta function of an algebraic
+  variety}, Amer.\ J.\ Math. \textbf{82} (1960), 631--648.
+
+\bibitem{Dwork62b}
+\bysame, \emph{A deformation theory for the zeta function of a hypersurface},
+  Proceedings of the {I}nternational {C}ongress of {M}athematicians, Stockholm,
+  1962, pp.~247--259.
+
+\bibitem{Dwork62}
+\bysame, \emph{On the zeta function of a hypersurface~{I}}, Publication
+  Math\'ematiques de l'IH\'ES \textbf{12} (1962), 5--68.
+
+\bibitem{Dwork64}
+\bysame, \emph{On the zeta function of a hypersurface~{II}}, The {A}nnals of
+  {M}athematics, {S}econd {S}eries \textbf{80} (1964), no.~2, 227--299.
+
+\bibitem{Elkies1998}
+N.~D. Elkies, \emph{Elliptic and modular curves over finite fields and related
+  computational issues}, Computational perspectives on number theory
+  ({C}hicago, {IL}, 1995), AMS/IP Stud. Adv. Math., vol.~7, Amer. Math. Soc.,
+  Providence, RI, 1998, pp.~21--76.
+
+\bibitem{Gerkmann2007}
+R.~Gerkmann, \emph{Relative rigid cohomology and deformation of hypersurfaces},
+  Int. Math. Res. Pap. IMRP (2007), no.~1, 67.
+
+\bibitem{GriffithsHarris1978}
+P.~Griffiths and J.~Harris, \emph{Principles of algebraic geometry}, John Wiley
+  \& Sons, 1978.
+
+\bibitem{Griffiths1969}
+P.~A. Griffiths, \emph{On the periods of certain rational integrals. {I},
+  (resp.~{II})}, Ann. of Math. (2) \textbf{90} (1969), no.~3, 460--495 (resp.\
+  496--541).
+
+\bibitem{FLINT}
+W.~Hart, S.~Pancratz, A.~Novocin, F.~Johansson, and D.~Harvey, \emph{{FLINT:
+  Fast Library for Number Theory -- Version 2.2}}, June 2011,
+  \url{http://www.libflint.org}.
+
+\bibitem{Har77}
+R.~Hartshorne, \emph{Algebraic geometry}, Graduate Texts in Mathematics,
+  vol.~52, Springer, 1977.
+
+\bibitem{Harvey2007}
+D.~Harvey, \emph{Kedlaya's algorithm in larger characteristic}, Int. Math. Res.
+  Not. IMRN (2007), no.~22, Art. ID rnm095, 29.
+
+\bibitem{Hubrechts2007}
+H.~Hubrechts, \emph{Point counting in families of hyperelliptic curves in
+  characteristic 2}, LMS J. Comput. Math. \textbf{10} (2007), 207--234.
+
+\bibitem{Hubrechts2008}
+\bysame, \emph{Point counting in families of hyperelliptic curves}, Found.
+  Comput. Math. \textbf{8} (2008), no.~1, 137--169.
+
+\bibitem{Kaltofen1992}
+E.~Kaltofen, \emph{On computing determinants of matrices without divisions},
+  Proc.~{ISSAC~\'1992} (P.~Wang, ed.), ACM Press, 1992, pp.~342--349.
+
+\bibitem{KarpMarkstein1997}
+A.~H. Karp and P.~Markstein, \emph{High-precision division and square root},
+  ACM Trans. Math. Software \textbf{23} (1997), no.~4, 561--589.
+
+\bibitem{KatzOda1968}
+N.~Katz and T.~Oda, \emph{On the differentiation of de {Rham} cohomology
+  classes with respect to parameters}, J. Math. Kyoto Univ. \textbf{8} (1968),
+  no.~2, 199--213.
+
+\bibitem{Kedlaya2001}
+K.~S. Kedlaya, \emph{Counting points on hyperelliptic curves using
+  {M}onsky-{W}ashnitzer cohomology}, J. Ramanujan Math. Soc. \textbf{16}
+  (2001), no.~4, 323--338.
+
+\bibitem{Kedlaya2004}
+\bysame, \emph{Computing zeta functions via {$p$}-adic cohomology}, Algorithmic
+  number theory, Lecture Notes in Comput. Sci., vol. 3076, Springer, Berlin,
+  2004, pp.~1--17.
+
+\bibitem{Kedlaya2008}
+\bysame, \emph{$p$-adic cohomology: from theory to practice}, $p$-adic
+  Geometry: Lectures from the 2007 {Arizona} {Winter} {School} (D.~Savitt and
+  D.~Thakur, eds.), University Lecture Series, vol.~45, American Mathematical
+  Society, 2008, pp.~175--201.
+
+\bibitem{Kedlaya2010}
+\bysame, \emph{$p$-adic differential equations}, Cambridge Univ. Press, 2010.
+
+\bibitem{Kedlaya2011}
+\bysame, \emph{Effective $p$-adic cohomology for cyclic cubic threefolds},
+  Computational Algebraic and Analytic Geometry of Low-dimensional Varities,
+  American Mathematical Society, 2011.
+
+\bibitem{KedlayaTuitman2012}
+K.~S. Kedlaya and J.~Tuitman, \emph{Effective bounds for {F}robenius
+  structures}, Rendiconti del Seminario Matematico della Universit\'a di Padova
+  (2012), 9.
+
+\bibitem{Lau04a}
+A.~G.~B. Lauder, \emph{Counting solutions to equations in many variables over
+  finite fields}, Foundations of Computational Mathematics \textbf{4} (2004),
+  no.~3, 221--267.
+
+\bibitem{Lau04}
+\bysame, \emph{Deformation theory and the computation of zeta functions}, Proc.
+  London Math. Soc \textbf{3} (2004), 565--602.
+
+\bibitem{Lauder2006}
+\bysame, \emph{A recursive method for computing zeta functions of varieties},
+  LMS J. Comp. Math. \textbf{9} (2006), 222--269.
+
+\bibitem{Lauder2011}
+\bysame, \emph{{D}egenerations and limit {F}robenius structures in rigid
+  cohomology}, LSM J. Comp. Math. \textbf{14} (2011), 1--33.
+
+\bibitem{Macaulay1994}
+F.~Macaulay, \emph{The algebraic theory of modular systems}, Cambridge
+  Mathematical Library, Cambridge Univ. Press, 1994.
+
+\bibitem{Osserman2008}
+B.~Osserman, \emph{The {W}eil conjectures}, The {P}rinceton {C}ompanion to
+  {M}athematics (W.~Gowers, ed.), Princeton Univ.\ Press, 2008, pp.~729--732.
+
+\bibitem{PatersonStockmeyer1973}
+S.~Paterson and L.~Stockmeyer, \emph{On the number of nonscalar multiplications
+  necessary to evaluate polynomials}, {SIAM} J.~Comput. \textbf{2} (1973),
+  no.~1, 7.
+
+\bibitem{Pila1990}
+J.~Pila, \emph{Frobenius maps of abelian varieties and finding roots of unity
+  in finite fields}, Math. Comp. \textbf{55} (1990), no.~192, 745--763.
+
+\bibitem{Rei76}
+J.~Reid, \emph{Solution of linear systems of equations: Direct methods}, Sparse
+  Matrix Techniques (Copenhagen) (V.~Barker, ed.), vol. 572, Springer, 1976.
+
+\bibitem{Satoh2000}
+T.~Satoh, \emph{The canonical lift of an ordinary elliptic curve over a finite
+  field and its point counting}, J. Ramanujan Math. Soc. \textbf{15} (2000),
+  no.~4, 247--270.
+
+\bibitem{SchoenhageStrassen1971}
+A.~Sch{\"o}nhage and V.~Strassen, \emph{Schnelle {M}ultiplikation gro\ss er
+  {Z}ahlen}, Computing (Arch. Elektron. Rechnen) \textbf{7} (1971), 281--292.
+
+\bibitem{Schoof1985}
+R.~Schoof, \emph{Elliptic curves over finite fields and the computation of
+  square roots mod {$p$}}, Math. Comp. \textbf{44} (1985), no.~170, 483--494.
+
+\bibitem{Seifullin2002}
+T.~R. Se{\u\i}fullin, \emph{Computation of the determinant, adjoint matrix, and
+  characteristic polynomial without division}, Cybernet. Systems Anal.
+  \textbf{38} (2002), no.~5, 650--672.
+
+\bibitem{Strassen1969}
+V.~Strassen, \emph{Gaussian elimination is not optimal}, Numer. Math.
+  \textbf{13} (1969), 354--356.
+
+\bibitem{ThullYap1990}
+K.~Thull and C.~K. Yap, \emph{A unified approach to {HGCD} algorithms for
+  polynomials and integers}, 1990.
+
+\bibitem{Tuitman2011}
+J.~Tuitman, \emph{Counting points in families of nondegenerate curves}, Ph.D.
+  thesis, {K}atholieke {U}niversiteit {L}euven, 2011.
+
+\bibitem{GathenGerhard2003}
+J.~von~zur Gathen and J.~Gerhard, \emph{Modern computer algebra (2. ed.)},
+  Cambridge Univ. Press, 2003.
+
+\bibitem{Walker2009}
+G.~Walker, \emph{Computing zeta functions of varieties via fibration}, Ph.D.
+  thesis, {U}niversity of {O}xford, 2009.
+
+\bibitem{Weil1949}
+A.~Weil, \emph{Numbers of solutions of equations in finite fields}, Bull.\
+  {A}mer.\ {M}ath.\ {S}oc. \textbf{55} (1949), 497--508.
+
+\end{thebibliography}

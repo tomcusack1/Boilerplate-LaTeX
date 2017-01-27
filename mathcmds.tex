@@ -1,0 +1,190 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A selection of mathematical commands for inclusion in a LaTeX document.
+% 
+% Author.  Sebastian Pancratz
+% Date.    Nov 2009
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Packages
+
+\usepackage{amsmath,amsthm,amscd,amsfonts,amssymb}
+\usepackage{cases}
+\usepackage[all]{xy}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% General Mathematics
+
+\newcommand{\myland}{\mspace{6mu} \land \mspace{6mu}}%  logical and
+\newcommand{\mylor}{\mspace{6mu} \lor \mspace{6mu}}%    logical or
+
+\renewcommand{\to}{\rightarrow}%           Right arrow
+\newcommand{\into}{\hookrightarrow}%     Injection arrow
+\newcommand{\onto}{\twoheadrightarrow}%  Surjection arrow
+
+\providecommand{\card}[1]{\left\lvert#1\right\rvert}%    Cardinality
+\providecommand{\cardts}[1]{\lvert#1\rvert}%             Cardinality
+\providecommand{\cardbig}[1]{\bigl\lvert#1\bigr\rvert}%  Cardinality
+
+\providecommand{\abs}[1]{\lvert#1\rvert}%                  Absolute value
+\providecommand{\absbig}[1]{\bigl\lvert#1\bigr\rvert}%     Absolute value
+\providecommand{\absBig}[1]{\Bigl\lvert#1\Bigr\rvert}%     Absolute value
+\providecommand{\absbigg}[1]{\biggl\lvert#1\biggr\rvert}%  Absolute value
+
+\providecommand{\norm}[1]{\lVert#1\rVert}%               Norm
+\providecommand{\normbig}[1]{\bigl\lVert#1\bigr\rVert}%  Norm
+\providecommand{\normBig}[1]{\Bigl\lVert#1\Bigr\rVert}%  Norm
+
+\providecommand{\floor}[1]{\left\lfloor#1\right\rfloor}%    Floor
+\providecommand{\floorts}[1]{\lfloor#1\rfloor}%             Floor
+\providecommand{\floorbig}[1]{\bigl\lfloor#1\bigr\rfloor}%  Floor
+\providecommand{\floorBig}[1]{\Bigl\lfloor#1\Bigr\rfloor}%  Floor
+
+\providecommand{\ceil}[1]{\left\lceil#1\right\rceil}%  Ceiling
+
+\providecommand{\id}{\iota}%              Identity element or function
+\DeclareMathOperator{\ind}{1}%            Indicator function
+\DeclareMathOperator{\indf}{\mathbf{1}}%  Indicator function
+
+\DeclareMathOperator{\fCoKer}{coker}%  Cokernel
+\DeclareMathOperator{\fKer}{ker}%      Kernel
+\DeclareMathOperator{\fIm}{Im}%        Image
+
+\DeclareMathOperator{\Comb}{C}%  Combinations
+\DeclareMathOperator{\Perm}{P}%  Permutations
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Commonly used Sets
+
+\newcommand{\N}{\mathbf{N}}%  Natural numbers
+\newcommand{\Z}{\mathbf{Z}}%  Integers
+\newcommand{\Q}{\mathbf{Q}}%  Rationals
+\newcommand{\A}{\mathbf{A}}%  Algebraic numbers
+\newcommand{\R}{\mathbf{R}}%  Real numbers
+\providecommand{\C}{\mathbf{C}}%  Complex numbers
+\newcommand{\F}{\mathbf{F}}%  Finite field
+
+\let\P=\undefined
+\newcommand{\P}{\mathbf{P}}%  Projective space, N.B.  Clashes with Probability
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Probability
+
+%\let\P=\undefined
+
+\DeclareMathOperator{\E}{\mathbb{E}}%  Expectation
+%\DeclareMathOperator{\P}{\mathbb{P}}%  Probability
+\DeclareMathOperator{\Var}{Var}%       Variance
+\DeclareMathOperator{\Cov}{Cov}%       Covariance
+\DeclareMathOperator{\Corr}{Corr}%     Correlation
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Algebraic Topology
+
+\DeclareMathOperator{\rel}{rel}
+\providecommand{\GeoReal}[1]{\abs{#1}}
+\DeclareMathOperator{\Star}{star}
+\DeclareMathOperator{\mesh}{mesh}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Complex Analysis
+
+\providecommand{\wn}{\omega}%  Winding number
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Galois Theory
+
+\DeclareMathOperator{\Disc}{Disc}%      Discriminant
+\DeclareMathOperator{\ch}{char}%        Characteristic
+\DeclareMathOperator{\geomCirc}{circ}%  Circle for ruler & compass constructions
+\DeclareMathOperator{\Gal}{Gal}%        Galois group
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Graph Theory
+
+\providecommand{\E}{\mathbb{E}}%  Edge space
+\providecommand{\V}{\mathbb{V}}%  Vertex space
+\DeclareMathOperator{\ex}{ex}%    Maximal size of a graph such that it does not have a given subgraph
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Groups, Rings and Modules
+
+\providecommand{\subgrp}{\leq}%           Subgroup
+\providecommand{\normal}{\triangleleft}%  Normal subgroup
+\providecommand{\subring}{\leq}%          Subring
+\providecommand{\ideal}{\triangleleft}%   Ideal
+\providecommand{\submodule}{\leq}%        Submodule
+
+\DeclareMathOperator{\Sym}{Sym}%      Symmetric group
+\DeclareMathOperator{\Aut}{Aut}%      Automorphism group
+\DeclareMathOperator{\ccl_G}{ccl_G}%  Conjugacy class
+\DeclareMathOperator{\Ann}{Ann}%      Annihilator
+\DeclareMathOperator{\sgn}{sgn}%      Sign, signature
+\DeclareMathOperator{\stab}{Stab}%    Stabiliser
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Linear Algebra, Linear Analysis
+
+\providecommand{\vect}[1]{\mathbf{#1}}%                       Vector
+\providecommand{\vspan}[1]{\langle #1 \rangle}%               Span
+\providecommand{\iprod}[2]{\langle #1,#2 \rangle}%            Inner product
+\providecommand{\ip}[2]{\left\langle #1 , #2 \right\rangle}%  Inner product
+
+\DeclareMathOperator{\rank}{rank}%       Rank of a matrix
+\DeclareMathOperator{\vsspan}{span}%     Span
+\DeclareMathOperator{\diag}{diag}%       Diagonal matrix
+\DeclareMathOperator{\rowrank}{rowrk}%   Row rank
+\DeclareMathOperator{\colspace}{colsp}%  Column space
+\DeclareMathOperator{\rowspace}{rowsp}%  Column space
+\DeclareMathOperator{\adj}{adj}%         Adjoint matrix
+\DeclareMathOperator{\trace}{tr}%        Trace
+\DeclareMathOperator{\End}{End}%         Space of endomorphisms
+\DeclareMathOperator{\SL}{SL}%           Special linear group of matrices
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Metric and Topological Spaces
+
+\DeclareMathOperator{\diam}{diam}%  Diameter
+\DeclareMathOperator{\Int}{int}%    Interior of a set
+\DeclareMathOperator{\Cl}{cl}%      Closure of a set
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Number Theory
+
+\providecommand{\jacobi}[2]{\left( \frac{#1}{#2} \right)}%    Jacobi symbol (display)
+\providecommand{\jacobii}[2]{\left( #1 \vert #2 \right)}%     Jacobi symbol (inline)
+\providecommand{\legendre}[2]{\left( \frac{#1}{#2} \right)}%  Legendre symbol (display)
+\providecommand{\legendrei}[2]{\left( #1 \vert #2 \right)}%   Legendre symbol (inline)
+
+\DeclareMathOperator{\hcf}{hcf}%  Highest common factor
+\DeclareMathOperator{\lcm}{lcm}%  Lowest common multiple
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Local Fields
+
+\newcommand{\ilim}{\varprojlim}%  inverse limit
+
+\DeclareMathOperator{\ord}{ord}%          Valuation
+\DeclareMathOperator{\Frac}{Frac}%        Field of fractions
+\DeclareMathOperator{\Frob}{\mathcal{F}}% Frobenius map
+\DeclareMathOperator{\Hom}{Hom}%          Space of homomorphisms
+\DeclareMathOperator{\Tr}{Tr}%            Trace
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Algebraic Geometry
+
+\DeclareMathOperator{\Spec}{Spec}%  Spectrum
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calligraphic letters
+
+\providecommand{\cB}{\mathcal{B}}%   Basis, factor base
+\providecommand{\fC}{\mathfrak{C}}%  Codes
+\providecommand{\cS}{\mathcal{S}}%   Signatures
+\providecommand{\cK}{\mathfrak{K}}%  Keys
+\providecommand{\cM}{\mathfrak{M}}%  Messages
+\providecommand{\cE}{\mathcal{E}}%   (See error locator polynomial)
+\providecommand{\cF}{\mathcal{F}}%   Family
+\providecommand{\cO}{\mathcal{O}}%   Big-oh notation
+\providecommand{\cP}{\mathcal{P}}%   Power set
+\providecommand{\cR}{\mathcal{R}}%   Row index set
+\providecommand{\cC}{\mathcal{C}}%   Column index set

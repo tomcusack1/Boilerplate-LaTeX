@@ -1,0 +1,253 @@
+\documentclass[a4paper,11pt]{book}
+
+\author{Sebastian Pancratz}
+\title{Practical improvements to the deformation method for point counting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Geometry and page layout
+
+\usepackage[hmargin=3.2cm,vmargin=3.2cm,a4paper,centering,twoside]{geometry}
+
+\setlength{\headheight}{14pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Other packages
+
+\usepackage{ifpdf}
+\usepackage{paralist}
+\usepackage{fancyhdr}
+\usepackage{sectsty}
+\usepackage{natbib}
+\usepackage{url}
+\usepackage[T1]{fontenc}
+\usepackage{ae,aecompl}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{verbatim}
+
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{positioning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% hyperref
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=false,   % false: boxed links; true: colored links
+    citecolor=green,    % color of links to bibliography
+    filecolor=magenta,  % color of file links
+    linkcolor=red,      % color of internal links
+    urlcolor=blue       % color of external links
+}
+
+\makeatletter
+\newcommand\org@hypertarget{}
+\let\org@hypertarget\hypertarget
+\renewcommand\hypertarget[2]{%
+    \Hy@raisedlink{\org@hypertarget{#1}{}}#2%
+} 
+\makeatother
+
+\ifpdf
+    \hypersetup{
+        pdftitle={Deformation method},
+        pdfauthor={Sebastian Pancratz},
+        pdfsubject={Computational Number Theory},
+        bookmarks=true,
+        bookmarksnumbered=true,
+        unicode=true,
+        pdfstartview={FitH},
+        pdfpagemode={UseOutlines}
+    }
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% algorithmic
+
+\usepackage[chapter]{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% natbib
+
+\bibpunct{[}{]}{,}{n}{}{}
+%\bibpunct{[}{]}{;}{a}{,}{,}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% sectsty
+
+\allsectionsfont{\nohang\centering}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% fancyhdr
+
+\newcommand\nouppercase[1]{{%
+    \let\uppercase\relax
+    \let\MakeUppercase\relax
+    \expandafter\let\csname MakeUppercase \endcsname\relax#1}%
+}
+
+\pagestyle{fancyplain}
+
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+\fancyhf{}
+\fancyhead[LE,RO]{\bfseries\thepage}
+\fancyhead[LO]{\itshape\nouppercase{\rightmark}}
+\fancyhead[RE]{\itshape\nouppercase{\leftmark}}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\fancypagestyle{plain}{%
+  \fancyhead{}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+\makeatletter
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+    \hbox{}
+    \thispagestyle{plain}
+    \newpage
+    \if@twocolumn\hbox{}\newpage\fi\fi\fi}
+\makeatother \clearpage{\pagestyle{plain}\cleardoublepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% url
+
+\makeatletter
+\def\url@leostyle{%
+  \@ifundefined{selectfont}{\def\UrlFont{\sf}}{\def\UrlFont{\small\ttfamily}}}
+\makeatother
+\urlstyle{leostyle}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Enumeration
+
+\setlength{\pltopsep}{0.24em}
+\setlength{\plpartopsep}{0em}
+\setlength{\plitemsep}{0.24em}
+
+% This should do what we want
+%   \setdefaultenum{(i)}{(a)}{1.}{A}
+% but it does not work for references, dropping the parentheses.  The following
+% hack does work.
+
+\renewcommand{\theenumi}{(\roman{enumi})}
+\renewcommand{\theenumii}{(\alph{enumii})}
+\renewcommand{\theenumiii}{\arabic{enumiii}.}
+\renewcommand{\theenumiv}{\Alph{enumiv}}
+
+\renewcommand{\labelenumi}{\theenumi}
+\renewcommand{\labelenumii}{\theenumii}
+\renewcommand{\labelenumiii}{\theenumiii}
+\renewcommand{\labelenumiv}{\theenumiv}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bibliography name
+
+% \renewcommand{\bibname}{References}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Mathematical definitions
+
+\input{mathcmds}
+
+\DeclareMathOperator{\Res}{Res}
+\DeclareMathOperator{\Trace}{Tr}
+\DeclareMathOperator{\Norm}{N}
+%\DeclareMathOperator{\Gal}{Gal}
+%\DeclareMathOperator{\ord}{ord}
+\providecommand{\ceil}[1]{\left\lceil#1\right\rceil}%  Ceil
+\providecommand{\ceilts}[1]{\lceil#1\rceil}%  Ceil
+\providecommand{\ceilbig}[1]{\bigl\lceil#1\bigr\rceil}%  Ceil
+\providecommand{\floor}[1]{\left\lfloor#1\right\rfloor}%  Floor
+\providecommand{\floorts}[1]{\lfloor#1\rfloor}%  Floor
+
+\providecommand{\HdR}{H_{\text{dR}}}
+\providecommand{\Het}{H_{\text{\'et}}}
+\providecommand{\Hrig}{H_{\text{rig}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Equations
+
+\allowdisplaybreaks[4]
+\numberwithin{equation}{chapter}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Theorems etc
+
+\theoremstyle{definition}
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{exmp}[thm]{Example}
+\newtheorem{rem}[thm]{Remark}
+\newtheorem{notation}[thm]{Notation}
+\newtheorem{prob}[thm]{Problem}
+\newtheorem{obs}[thm]{Observation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Line spacing
+
+\usepackage{setspace}
+
+\doublespacing
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Table of contents spacing
+
+\usepackage{tocstyle}
+
+\usetocstyle{standard}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DOCUMENT                                                                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\frontmatter
+
+\include{Cover}
+
+\include{Acknowledgements}
+
+\include{Abstract}
+
+\tableofcontents
+
+\mainmatter
+
+{%
+\part{The deformation method}
+\include{01-dm}
+}
+
+{%
+\part{The fibration method and fast radix conversion for polynomials}
+\include{02-rc}
+}
+
+{%
+\part{Implementing the underlying arithmetic}
+\include{03-ar}
+}
+
+\backmatter
+
+\phantomsection
+\addcontentsline{toc}{part}{Bibliography}
+
+\bibliographystyle{thesis}
+\bibliography{thesis}
+
+\end{document}
+

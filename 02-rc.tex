@@ -1,0 +1,454 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Introduction                                                                %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Introduction}
+\label{ch:02-Intro}
+
+In this part of the thesis, we describe various strategies to solve the 
+problem of polynomial radix conversion.  Two approaches, the naive 
+repeated division by the radix and the divide and conquer strategies, are 
+well known, see e.g.~\citep[\S 9.2]{GathenGerhard2003}.  We present a 
+practical improvement to the latter approach based on the use of 
+precomputed power series inverses.  A number theoretical application is 
+the fibration method for point counting, in current implementations of 
+which the runtime in practice is dominated by radix conversions.
+
+In its general form, the problem of polynomial radix conversion 
+can be stated as follows:
+
+\begin{prob} \label{prob:exact}
+Let $R$ be a ring\footnotemark\ and suppose that a polynomial $f \in R[X]$ is 
+presented in the usual monomial basis as $f(X) = \sum_{i=0}^{n} a_i X^i$.
+Suppose that $r \in R[X]$ is another polynomial, called the \emph{radix}, 
+such that $m = \deg(r) \geq 1$ and the leading coefficient of~$r$ is invertible 
+in $R$.  Compute polynomials $b_0, \dotsc, b_{\ell} \in R[X]$ in terms of 
+the monomial basis such that 
+\begin{equation*}
+f = b_0 + b_1 r + \dotsb b_{\ell} r^{\ell}
+\end{equation*}
+where necessarily $\ell = \floor{n / m}$.
+\end{prob}
+
+\footnotetext{The term \emph{ring} here means commutative ring with 
+multiplicative identity.}
+
+The existence and uniqueness of the sequence of polynomials $b_0, \dotsc, b_{\ell}$ 
+follows easily from the properties of Euclidean division;  an explicit algorithm is 
+presented in Section~\ref{sec:EuclideanDivision}.
+
+To motivate the work in this context, we point out that Lauder's 
+fibration algorithm for counting points on smooth projective varieties 
+in practice heavily benefits from a fast implementation for this problem 
+of radix conversions, see Lauder~\citep[\S 6.5.2]{Lauder2006} or 
+Walker~\citep[\S 3.2.2]{Walker2009}.  In both these cases, the authors 
+utilise the divide and conquer approach in their computations.  In the 
+fibration algorithm, one has to convert the power series of each 
+entry in a local expansion of a Frobenius matrix.  That is to say, 
+the number of instances with the same radix polynomial is quadratic 
+in the dimension of the middle-dimensional rigid cohomology space, 
+which motivates our approach using precomputed power series inverses.
+
+In this context, we consider our ring $R$ to be the field $\mathbf{Q}_p$, 
+although in practice computations will only be carried out to finite 
+$p$-adic precision.
+
+\begin{prob} \label{prob:padic}
+Given two polynomials $f, r \in \mathbf{Q}_p[X]$ such that 
+$r \neq 0$ and the valuation of the leading coefficient of 
+$r$ is equal to $\ord_p(r)$, find a representation of $f$ 
+in the form
+\begin{equation*}
+f = b_0 + b_1 r + \dotsb + b_{\ell} r^{\ell}.
+\end{equation*}
+\end{prob}
+
+In the remaining part of this section, we describe how to 
+reduce Problem~\ref{prob:padic} to the original 
+Problem~\ref{prob:exact} and carry out the $p$-adic precision 
+analysis.
+
+Write $f = p^{\ord_p(f)} g$ and $r = p^{\ord_p(r)} s$ 
+with two polynomials $g$ and $s$ in $\mathbf{Z}_p[X]$ 
+each containing at least one coefficient which is a unit 
+in $\mathbf{Z}_p$.  The above equation then becomes
+\begin{equation*}
+g = p^{-\ord_p(f)} b_0 + p^{-\ord_p(f) + \ord_p(r)} b_1 s + \dotsb + p^{-\ord_p(f) + \ell \ord_p(r)} b_{\ell} s^{\ell}
+\end{equation*}
+and we also note that the leading coefficient of $s$ 
+is a unit in $\mathbf{Z}_p$.
+In order to solve Problem~\ref{prob:padic}, we first solve the above 
+for the polynomials $g$ and $s$ over $\mathbf{Z}_p$, obtaining a 
+sequence of polynomials $c_0, \dotsc, c_{\ell}$ in $\mathbf{Z}_p[X]$ 
+such that 
+\begin{equation*}
+g = c_0 + c_1 s + \dotsb + c_{\ell} s^{\ell}.
+\end{equation*}
+We can then recover the sequence $b_0, \dotsc, b_{\ell}$ via 
+\begin{equation*}
+b_i = p^{\ord_p(f) - i \ord_p(r)} c_i.
+\end{equation*}
+We observe that, in order to determine the polynomial $b_i$ 
+modulo $p^N$ we need to determine the polynomial $c_i$ 
+modulo $p^{N + i \ord_p(r) - \ord_p(f)}$.  Maximising this 
+over the whole sequence of polynomials, we see that we need 
+to determine the polynomials $c_0, \dotsc, c_{\ell}$ modulo 
+$p^{N + \eta}$ where
+\begin{equation*}
+\eta = - \ord_p(f) + \max\{\ell \ord_p(r), 0\}.
+\end{equation*}
+Thus, we require that the polynomial $f \in \mathbf{Q}_p[X]$ 
+is provided to precision 
+\begin{equation*}
+N + \eta + \ord_p(f) = N + \max\{\ell \ord_p(r), 0\}.
+\end{equation*}
+and that $r \in \mathbf{Q}_p[X]$ is provided to precision 
+\begin{equation*}
+N + \eta + \ord_p(r) = N - \ord_p(f) + \ord_p(r) + \max\{\ell \ord_p(r), 0\}.
+\end{equation*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Algorithms                                                                  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Algorithms}
+\label{ch:02-Algorithms}
+
+% Euclidean division and complexity results  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Euclidean division and complexity results}
+\label{sec:EuclideanDivision}
+
+In this section we collect a few well known results for later 
+reference.
+
+\begin{prop}
+Let $R$ be a ring and suppose that $f, r \in R[X]$ with the 
+leading coefficient of $r$ a unit in $R$.  Then there exist 
+unique polynomials $q, s \in R[X]$ such that $f = q r + s$ 
+with $s = 0$ or $\deg(s) < \deg(r)$.
+\end{prop}
+
+This result is well known in the context of polynomial rings 
+over fields.  The usual proof of this result in $\mathbf{Q}[X]$ 
+applies upon observing that only the inverse of the leading 
+coefficient is required in the division process.
+
+\begin{prop} \label{prop:mul}
+There exists an algorithm returning the degree~$2n$ product of two 
+polynomials of degree~$n$ in $\mathcal{O}(n \log n \log \log n)$ 
+ring operations.
+\end{prop}
+
+Such an algorithm can be constructed based on Fast Fourier Transform 
+techniques, see for example~\citep[\S Theorem~8.23]{GathenGerhard2003} or 
+\citep[\S 4]{Bernstein2008}.
+
+\begin{prop} \label{prop:div1}
+There exists an algorithm returning the degree~$n$ quotient 
+in a Euclidean division with a dividend of degree~$2n$ 
+and a divisor of degree~$n$ in $\mathcal{O}(n \log n \log \log n)$ 
+ring operations.
+\end{prop}
+
+This result can be derived from the previous one by exhibiting an algorithm 
+for Euclidean division with the same asymptotic time requirements as 
+multiplication, see for example~\citep[\S 17]{Bernstein2008}.
+
+\begin{cor} \label{cor:div2}
+In the unbalanced case for a dividend of degree~$n$ and 
+a divisor of degree~$m$, where $m \leq n$, there exists an 
+algorithm that returns the degree~\mbox{$n-m$} quotient in 
+$\mathcal{O}(n \log m \log \log m)$ ring operations.
+\end{cor}
+
+This can be achieved by splitting the dividend into parts of degree~$2m$ 
+and applying the previous algorithm in these balanced divisions, carefully 
+combining the results.
+
+% Repeated division by radix  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Repeated division by the radix}
+
+The naive solution to the radix conversion problem consists of 
+obtaining the sequence of polynomials $b_0, \dotsc, b_{\ell}$ 
+by performing $\ell$ Euclidean divisions with remainder.  Letting 
+{\sc DivRem} denote a routine that performs Euclidean division, 
+this approach can be formalised as follows:
+
+\begin{algorithm}[H]
+\caption{Repeated division by the radix}
+\label{alg:RepeatedDivision}
+\begin{algorithmic}
+\vspace{1mm}
+\Procedure{RadixConversion}{$b$, $f$, $r$}
+\State $f_0 \gets f$
+\For{$i \gets 0, \dotsc, \ell-1$}
+\State $f_{i+1}, b_i \gets \Call{Divrem}{f_i, r}$
+\EndFor
+\State $b_{\ell} \gets f_{\ell}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+We can repeatedly apply the previous result on the complexity 
+of unbalanced divisions, Corollary~\ref{cor:div2}, with fixed 
+divisor~$r$.  The conclusion is that the complexity of this 
+algorithm is $\mathcal{O} \bigl( n^2 m^{-1} \log m \log \log m \bigr)$.
+
+% Divide and conquer  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Divide and conquer}
+
+In this section we present another algorithm, which achieves 
+a better time complexity.  The driving idea is that we divide 
+the polynomial $f$ into two halves and then deal with each half 
+separately.  This recursive idea is formalised in 
+Algorithm~\ref{alg:DivConquer}.
+
+\begin{algorithm}[H]
+\caption{Recursive divide and conquer}
+\label{alg:DivConquer}
+\begin{algorithmic}
+\vspace{1mm}
+\Procedure{RCRecursive}{$b$, $f$, $r$, $k$}
+\State $N \gets \floor{\deg(f) / \deg(r)}$
+\If{$N = 0$}
+\State $b_k \gets f$
+\Else
+\State $e \gets \ceil{N/2}$
+\State $Q, S \gets \Call{Divrem}{f, r^{e}}$
+\State $\Call{RCRecursive}{b, q, r, k + e}$
+\State $\Call{RCRecursive}{b, s, r, k}$
+\EndIf
+\EndProcedure
+\Procedure{RadixConversion}{$b$, $f$, $r$}
+\State $\Call{RCRecursive}{b, f, r, 0}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Before we proceed with the analysis of this algorithm, we make the 
+following assumption, which will allow for a cleaner presentation, 
+analysis and implementation of the algorithm:
+\begin{notation}
+Assume that $n = 2^k m - 1$ for some $k \geq 1$.
+\end{notation}
+
+\begin{rem}
+Since all Euclidean divisions then involve a dividend of 
+length $2^{i} m$ and a divisor of length $2^{i-1} m + 1$, 
+where $i = k, \dotsc, 1$, we can more efficiently re-use 
+precomputed data such as powers and Newton inverses of 
+the radix~$r$.
+
+Moreover, this assumption can easily be incorporated in an 
+implementation by choosing the least integer $k$ such that 
+$n \leq 2^k m - 1$ and then zero-padding the top coefficients 
+of~$f$.
+\end{rem}
+
+\begin{rem}
+The runtime of an implementation which enforces the above 
+assumption by zero-padding as a function of $n$ is 
+not smooth, featuring jumps as $n$ changes from 
+$2^k m - 1$ to $2^k m$.  Although this does not 
+affect the asymptotic behaviour, it is undesirable in 
+practice.  However, it is possible to combine the two 
+approaches, for example, by following Algorithm~\ref{alg:DivConquer} 
+at the first level and only pad the lengths to powers of~$2$ 
+as necessary at the subsequent levels.
+\end{rem}
+
+In order to determine the complexity of Algorithm~\ref{alg:DivConquer} 
+we count the number of multiplications as well as the number of 
+Euclidean divisions of each size.
+
+First, we note that we can precompute $r^{2^i}$ for $i = 1, \dotsc, k-1$ 
+before proceeding with the Euclidean divisions, by computing $k-1$ squares 
+involving input polynomials of length $2^{i} m + 1$ for 
+$i = 0, \dotsc, k-2$.  This part of the algorithm has complexity 
+\begin{equation*}
+\mathcal{O} \biggl( \sum_{i=0}^{k-2} \bigl(2^{i} m\bigr) 
+    \log \bigl(2^{i} m\bigr) \log \log \bigl(2^{i} m\bigr) \biggr)
+\end{equation*}
+which can be simplified to $\mathcal{O}(n \log n \log \log n)$.
+By inspection, there are $2^i$ divisions with dividend of length 
+$2^{k-i} m$ and divisor of length $2^{k-1-i} m + 1$
+for $i = 0, \dotsc, k-1$.  Thus, the complexity is 
+\begin{equation*}
+\mathcal{O} \biggl( \sum_{i=0}^{k-1} \bigl(2^{k-1-i} m + 1\bigr) 
+    \log \bigl(2^{k-1-i} m + 1\bigr) 
+    \log \log \bigl(2^{k-1-i} m + 1\bigr) \biggr)
+\end{equation*}
+which can be simplified to $\mathcal{O} \bigl( n \log n \log \log n \bigr)$.
+
+Thus, the overall complexity of Algorithm~\ref{alg:DivConquer} is 
+$\mathcal{O}(n \log n \log \log n)$.
+
+% Euclidean division with precomputed inverses  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Euclidean division with precomputed inverses}
+
+Since the first part of the divide and conquer algorithm, the 
+precomputation of the powers of the radix, already forces a 
+time complexity of at least $\mathcal{O} (n \log n \log \log n)$ 
+ring operations we cannot hope for an asymptotic improvement.
+
+However, by precomputing further data the cost of the repeated 
+Euclidean divisions can be reduced significantly.  This is 
+particularly valuable in the context of the fibration algorithm 
+where the operation of radix conversion is called repeatedly 
+for varying polynomials $f$ of similar degree but with an invariant 
+radix~$r$.  The approach presented in this section precomputes 
+power series inverses, allowing us to reduce the cost of a 
+Euclidean division to two short products, that is, routines
+that only require the lower half of the coefficients of a degree~$2n$ 
+product of two degree~$n$ factors.
+
+We now temporarily abandon the earlier notation to explain 
+a procedure for Euclidean division with precomputed inverses. 
+The algorithm, which is presented as Algorithm~\ref{alg:NewtonDivision}, 
+assumes that we have two subroutines at our disposal.  Firstly, 
+a routine $\Call{Rev}{f,n}$ that returns $X^{\deg(f)} f(X^{-1})$ 
+modulo~$X^n$, that is, a routine that simply reverses the top~$n$ 
+coefficients of $f$, possibly including zero padding if $f$ has degree 
+less than $n - 1$.  Secondly, a routine $\Call{Inv}{f,n}$ that returns 
+the power series inverse of~$f$ modulo~$X^n$.
+
+\begin{algorithm}[H]
+\caption{Newton division}
+\label{alg:NewtonDivision}
+\begin{algorithmic}
+\vspace{1mm}
+\Require Polynomials $a, b \in R[X]$ with $\deg(a) \geq \deg(b) > 0$ 
+         and the leading coefficient of $b$ invertible.
+\Ensure  Polynomials $q, r \in R[X]$ such that $a = qb + r$ with $r = 0$ 
+         or $\deg(r) < \deg(b)$.
+\Procedure{DivRem}{$q$, $r$, $a$, $b$}
+\State  $n \gets \deg(a) - \deg(b) + 1$
+\State  $a_r \gets \Call{Rev}{a,n}$
+\State  $b_r \gets \Call{Rev}{b,n}$
+\State  ${b_r}^{-1} \gets \Call{Inv}{b_r,n}$
+\State  $q_r \gets a_r {b_r}^{-1} \bmod X^n$
+\State  $q \gets \Call{Rev}{q_r, n}$
+\State{$r \gets a - q b$}
+\State \textbf{return} $q, r$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{rem}
+The properties of Euclidean division imply that $\deg(r) < \deg(b)$, 
+whenever $r$ is non-zero, which in turn implies that the top 
+$\deg(a) - \deg(b) + 1$ coefficients of $a$ and $q b$ 
+coincide.  Thus, in order to compute $r$ we do \emph{not} 
+need to compute the full product $q b$.  It suffices to 
+compute the product modulo $X^{\deg(b)}$.
+\end{rem}
+
+\begin{thm}
+Algorithm~\ref{alg:NewtonDivision} correctly determines 
+the quotient and remainder of the Euclidean division of 
+$a$ upon $b$.
+\end{thm}
+
+\begin{proof}
+Let $v_0$ and $v_{\infty}$ denote the valuations on $R(X)$ at 
+$0$ and $\infty$, respectively.  Note that, for $f \in R[X]$, 
+\begin{equation*}
+v_{\infty}(f) = - \deg(f).
+\end{equation*}
+We observe that $q, r \in R[X]$ such that $a = qb + r$ are 
+the output of the Euclidean division if and only if 
+\begin{equation*}
+v_{\infty} (a - qb) > v_{\infty} (b).
+\end{equation*}
+Let $\tilde{b}^{-1}$ denote an approximation to $b^{-1}$ 
+for $v_{\infty}$ and set $q = a \tilde{b}^{-1}$.  Then 
+\begin{equation*}
+a - qb = ab \bigl(b^{-1} - \tilde{b}^{-1}\bigr),
+\end{equation*}
+and it suffices to have an approximation such that 
+\mbox{$v_{\infty} \bigl( b^{-1} - \tilde{b}^{-1} \bigr) > - v_{\infty}(a)$}.
+
+We now relate this to the reverse polynomials.  Under the map 
+$X \mapsto X^{-1}$ we have that $v_{\infty}$ maps to $v_0$, 
+and $b$ maps to $X^{v_{\infty}(b)} b_r$, where $b_r$ denotes 
+the reverse polynomial to $b$.  Thus, in order to compute 
+$\tilde{b}^{-1}$ such that 
+\mbox{$v_{\infty} \bigl( b^{-1} - \tilde{b}^{-1} \bigr) > - v_{\infty}(a)$} 
+we have to compute an approximation $\tilde{b}_r^{-1}$ to 
+$b_r^{-1}$ for $v_0$ such that 
+\begin{gather*}
+v_0 \bigl( X^{-v_{\infty}(b)} \bigl(b_r^{-1} - \tilde{b}_r^{-1} \bigr) \bigr) > - v_{\infty} (a) \\
+\intertext{or, equivalently, }
+v_0 \bigl(b_r^{-1} - \tilde{b}_r^{-1}\bigr) > v_{\infty}(b) - v_{\infty}(a) = \deg(a) - \deg(b), 
+\end{gather*}
+as required.
+\end{proof}
+
+\begin{rem}
+In the notation of Algorithm~\ref{alg:NewtonDivision}, we observe 
+that if the power series inverse~$b_r^{-1}$ is part of the input, 
+the procedure reduces the Euclidean division to two short products, 
+one subtraction, and one reversal.
+\end{rem}
+
+\begin{rem}
+In Algorithm~\ref{alg:DivConquer}, all short products involve either 
+a power~$r^{2^i}$ of $r$, where $i = 0, \dotsc, k-1$ or the power series 
+inverse of such a power.  Thus, a further practical improvement might 
+be possible if the underlying arithmetic software packages of an 
+implementation allow for re-using data relevant to only one of the 
+factors in a polynomial multiplication.
+\end{rem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Examples                                                                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Examples}
+\label{ch:02-Exmp}
+
+We have implemented a routine for radix conversion as described 
+in the previous chapter in the C~language as part of the open-source 
+library FLINT~\citep{FLINT}.  Specifically, the routine is contained 
+in the module for polynomial arithmetic over $\mathbf{Z}/n\mathbf{Z}$ 
+as the function {\tt{fmpz\_mod\_poly\_radix()}}.  The timings that we 
+present for our routines were obtained on the departmental machine 
+{\tt{wolverine.maths.ox.ac.uk}}, featuring \mbox{Intel Xeon} processors 
+running at~2.93GHz.
+
+We consider an example due to Lauder~\citep[Example~9.1]{Lauder2006}.  
+Specifically, we consider the toric compactification of the smooth 
+surface given by 
+\begin{equation*}
+y^2 = x^3 + (4 t^4 + 5 t^3) x + 
+    (t^{13} + 6 t^{12} + 5 t^{10} + 
+    8 t^9 + 8 t^8 + 5 t^5 + t^4 + 5 t^3 + t^2 + 1)
+\end{equation*}
+over $\mathbf{F}_{17}$.  Lauder reports an overall runtime 
+of $23$~hours and $13$~minutes, pointing out that over half the 
+time was spent in the radix conversion routine.
+
+In the notation used by Lauder, we reestablish the parameters used 
+in the computation as $g = 1$, $N_3 = 18$, $x_{fin} = 476$ and 
+$N_{2,fin} = 26$.  Moreover, writing the equation defining the surface 
+as $y^2 = x^3 + A(t) x + B(t)$ we compute the resultant as 
+$4 A(t)^3 + 27 B(t)^2$, which is a polynomial of degree~$26$.  As the 
+$r(t)$-adic precision is given by $x_{fin}$, we find that the $t$-adic 
+precision is~$12,376$.
+
+In order to establish a comparison of Lauder's computation with the 
+routine we implemented, we perform a radix reduction of a random, 
+dense polynomial of degree~$12,376$ with coefficients 
+in~$\mathbf{Z}/17^{26} \mathbf{Z}$.  The precomputation step of our 
+routine, which computes powers of $r(t)$ and their power series 
+inverses, requires $0.06$~seconds.  The actual conversion step for a 
+single polynomial requires $0.14$~seconds.  As the relative Frobenius 
+matrix in Lauder's example is a $2 \times 2$~matrix of power series, 
+the relevant figure amounts to $0.06 + 4 \times 0.14 = 0.62$ seconds. 
+This is an improvement over the timings reported by Lauder by a 
+factor of at least~$67,403$.
+

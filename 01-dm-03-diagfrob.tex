@@ -1,0 +1,695 @@
+% Chapter:  Frobenius on the diagonal fibre  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In this chapter we discuss the action of Frobenius on the diagonal fibre. 
+We first describe the general method based on an explicit formula by 
+Dwork~\citep[\S 4]{Dwork64}, following the expositions in the work of 
+Lauder~\citep[\S 6]{Lau04} and Gerkmann~\citep[\S 4.4]{Gerkmann2007}.  
+Then, we present a new improvement in Theorem~\ref{thm:alpha}, showing 
+that a certain expression is defined already over $\mathbf{Q}_p$ instead 
+of a ramified extension as observed by Gerkmann.  Furthermore, 
+Theorems~\ref{thm:alpha2} and~\ref{thm:alphap} state the expression lies 
+in~$\mathbf{Z}_p$ and provide computationally suitable reformulations.  
+Our presentation of an explicit algorithm for the computation of the 
+action of Frobenius is followed by Theorems~\ref{thm:dm-diagfrob-complexity1} 
+and~\ref{thm:dm-diagfrob-complexity2} providing a complexity analysis.
+To conclude this chapter, we illustrate the practical relevance of these 
+improvements with three example computations.
+
+% Introduction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+In order to simplify our notation, we temporarily suppress the earlier 
+setup of a family of hypersurfaces.
+Thus, we consider a smooth, projective, diagonal hypersurface~$\mathcal{X}$ 
+over $\mathbf{Z}_p$ given by a polynomial $P \in \mathbf{Z}[x_0, \dotsc, x_n]$ 
+of homogeneous degree~$d$ and its reduction~$X$ over $\mathbf{F}_p$ given by 
+\begin{equation*}
+\tilde{P}(x_0, x_1, \dotsc, x_n) = 
+    a_0 x_0^d + a_1 x_1^d + \dotsb + a_n x_n^d = 0
+\end{equation*}
+where $a_0, a_1, \dotsc, a_n \in \mathbf{F}_p^{\times}$ and $p \nmid d$.  
+We also define the generic fibre~$\mathfrak{X}$  as well as affine 
+complements~$\mathcal{U}$, $U$ and $\mathfrak{U}$ of $\mathcal{X}$, $X$ 
+and $\mathfrak{X}$, respectively.  We choose the following basis 
+$\mathcal{B}_1 \cup \dotsb \cup \mathcal{B}_n$ for $\HdR^n(\mathfrak{U})$ 
+where, for $k = 1, \dotsc, n$, 
+\begin{align*}
+B_k & = \{ x^i : i \in \mathbf{N}_0^{n+1}, \text{$\abs{i} = kd - (n+1)$ and $0 \leq i_j < d-1$, for all $j$} \}, \\
+\mathcal{B}_k & = \{x^i \Omega / P^k : x^i \in B_k \}, 
+\end{align*}
+with $x^i = x_0^{i_0} \dotsm x_n^{i_n}$, and $\Omega$ is the $n$-form defined by 
+\begin{equation*}
+\Omega = \sum_{i=0}^n (-1)^i x_i d x_0 \wedge \dotsb \wedge \widehat{d x_i} \wedge \dotsb \wedge d x_n.
+\end{equation*}
+Further details of this construction can be found in 
+Section~\ref{sec:01-04-hypersurfaces}.
+Finally, we recall the condition that $d \geq 2$ whenever 
+$n$ is odd and $d \geq 3$ whenever $n$ is even.  
+Our goal is to compute the matrix~$\Phi$ representing 
+the action of $p^{-1} \Frob_p$ on $\Hrig^n(U) \cong \HdR^n(\mathfrak{U})$ 
+to $p$-adic precision~$N$.
+
+We now describe an explicit formula for the $\dim \HdR^n(\mathfrak{U})$ 
+non-zero coefficients of the matrix~$\Phi$ due to Dwork~\citep{Dwork64}, see 
+e.g.\ Lauder~\citep[\S 6.1]{Lau04}.   We work over the ramified 
+extension~$\mathbf{Q}_p(\pi)$ where $\pi^{p-1} = -p$, and we normalise 
+the valuation such that \mbox{$\ord_p(\pi) = (p-1)^{-1}$}.
+
+Let $u = (u_0, \dotsc, u_n)$ and $v = (v_0, \dotsc, v_n)$ be tuples such 
+that $x^u, x^v \in B_1 \cup \dotsb \cup B_n$,  and let $u'$ and $v'$ 
+denote integers such that $d u' = \sum_{i=0}^n (u_i + 1)$ and similarly 
+for $v'$.  Finally, for $m \geq 0$, let $\lambda_m$ denote the coefficient 
+of $z^m$ in the expansion of $\exp \pi (z - z^p)$ and define products 
+$(w)_r = \prod_{j=0}^{r-1} (w + j)$ for $w \in \mathbf{Q}$ and $r \geq 0$. 
+We introduce terms~$\alpha_{u,v}$, 
+\begin{equation} \label{eq:alpha}
+\alpha_{u,v} = \pi^{v' - u'} \prod_{i = 0}^n \sum_{m, r} \lambda_m (u_i / d)_r (-1)^r \pi^{-r} {\hat{a}_i}^{m-r}
+\end{equation}
+where $\hat{a}_i$ is the Teichm\"uller lift of $a_i \in \mathbf{F}_p$ 
+to $\mathbf{Q}_p$ and the summation indices $m, r \geq 0$ satisfy 
+$p u_i - v_i = d (m - pr)$.
+
+\begin{thm} \label{thm:01-03-diagfrob}
+Continuing with the notation set out above, let $\omega_1$ and $\omega_2$ 
+denote the forms in $\mathcal{B}_1 \cup \dotsb \cup \mathcal{B}_n$ 
+corresponding to $u$ and $v$, respectively.  
+Then $p^{-1} \Frob_p (\omega_1) = 0$ unless, for all $i = 0, \dotsc, n$, 
+$p (u_i + 1) \equiv v_i + 1 \pmod{d}$.  In this case, 
+\begin{equation*}
+p^{-1} \Frob_p (\omega_1) = 
+    (-1)^{u' + v'} \frac{(v' - 1)!}{(u' - 1)!} p^n \alpha_{u+1,v+1}^{-1} \omega_2
+\end{equation*}
+where $u + 1 = (u_0 + 1, \dotsc, u_n + 1)$ and similarly for $v + 1$.
+\end{thm}
+
+\begin{proof}
+See Dwork~\citep[\S 4]{Dwork64} for Dwork's original work, or 
+Lauder~\citep[\S 6.1]{Lau04}.  Both references also treat the 
+more general case when $\mathcal{X}$ is a smooth, projective, 
+diagonal hypersurface over $\mathbf{Z}_q$, for $q$ a prime power.
+\end{proof}
+
+% Improvements %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Improvements}
+
+From the previous description, it appears that this computation 
+genuinely has to take place over the extension field 
+$\mathbf{Q}_p(\pi)$.  This is, however, not the case as we 
+will show in this section.  We are able to show that the terms 
+$\alpha_{u+1,v+1}$ are $p$-adic integers and provide expressions 
+for these that are more suitable from a computational perspective.  
+
+\begin{lem} \label{lem:lambdam}
+Let $\pi^{p-1} = -p$ and, for $m \geq 0$, let $\lambda_m$ 
+be the coefficient of $z^m$ in the power series expansion 
+of $\exp \pi (z - z^p)$ in $\mathbf{Q}_p[[z]]$.  Then 
+\begin{equation*}
+\pi^{- (m \bmod{(p-1)})} \lambda_m = (-1)^{\floor{m/(p-1)}} \sum_{k=0}^{\floor{m/p}} p^{\floor{m/(p-1)} - k} \frac{1}{(m-pk)! k!},
+\end{equation*}
+where $m \bmod{(p-1)}$ denotes the remainder of $m$ upon Euclidean 
+division by $p-1$.
+\end{lem}
+
+\begin{proof}
+From
+\begin{equation*}
+\exp \pi (z - z^p) = \sum_{n=0}^{\infty} \frac{\pi^n}{n!} (z - z^p) ^n
+                   = \sum_{n=0}^{\infty} \frac{\pi^n}{n!} \sum_{k=0}^n \binom{n}{k} (-1)^k z^{n + k(p-1)}
+\end{equation*}
+we find that 
+\begin{align*}
+\lambda_m & = \sum_{n = 0}^{\infty} \frac{\pi^n}{n!} \sum_{\substack{0 \leq k \leq n\\n + k(p-1) = m}} \binom{n}{k} (-1)^k \\
+          & = \sum_{\substack{\ceil{m/p} \leq n \leq m\\ n \equiv m \pmod{p-1}}} \frac{\pi^n}{n!} \binom{n}{(m-n)/(p-1)} (-1)^{(m-n)/(p-1)} \\
+\intertext{To simplify this further, let $m = q(p-1) + r$ and 
+$n = q'(p-1) + r'$, noting that $r = r'$ and also setting 
+$k = (m-n)/(p-1) = q - q'$, }
+\lambda_m & = \sum_{\substack{\ceil{m/p} \leq n \leq m\\ n \equiv m \pmod{(p-1)}}} \pi^r p^{q'} (-1)^{q' + k} \frac{1}{(n-k)! k!} \\
+          & = (-1)^q \pi^r \sum_{k=0}^{\floor{m/p}} p^{q - k} \frac{1}{(m - pk)!k!}.
+\end{align*}
+The expression for $\pi^{-(m \bmod{(p-1)})} \lambda_m$ now follows.
+\end{proof}
+
+\begin{thm} \label{thm:alpha}
+Continuing with the notation set up in this chapter, let 
+$u, v \in \mathbf{Z}^{n+1}$ be such that 
+$x^u, x^v \in B_1 \cup \dotsb \cup B_n$ and satisfy, 
+for all $i$, $p (u_i + 1) \equiv v_i + 1 \pmod{d}$. 
+Then 
+\begin{equation*}
+\alpha_{u+1,v+1} = (-p)^{u'} \prod_{i=0}^n 
+    \hat{a}_i^{(p (u_i + 1) - (v_i + 1))/d} \sum_{m,r} 
+    \Bigl(\frac{u_i+1}{d}\Bigr)_r 
+    \sum_{k=0}^{\floor{m/p}} \frac{p^{r-k}}{(m-pk)! k!}.
+\end{equation*}
+where $m, r \geq 0$ satisfy $p (u_i + 1) - (v_i + 1) = d (m - pr)$. 
+\end{thm}
+
+\begin{proof}
+We begin from the definition of $\alpha_{u+1,v+1}$ 
+and use Lemma~\ref{lem:lambdam} to find that $\alpha_{u+1,v+1}$ 
+is equal to 
+\begin{gather*}
+\pi^{v'-u'} \prod_{i=0}^n \sum_{m,r} (-1)^{\floor{m/(p-1)}} \pi^{m \bmod{(p-1)}} \biggl( \sum_{k=0}^{\floor{m/p}} \frac{p^{\floor{m/(p-1)}-k}}{(m-pk)!k!} \biggr) \Bigl( \frac{u_i+1}{d} \Bigr)_r (-1)^r \pi^{-r} \hat{a}_i^{m-r}.
+\intertext{We now write $m = \floor{m/(p-1)} (p-1) + \bigl(m \bmod{(p-1)}\bigr)$ and simplify by $\pi^{p-1} = -p$, so this expression is equal to}
+\pi^{v'-u'} \prod_{i=0}^n \sum_{m,r} \pi^{m - r} \biggl( \sum_{k=0}^{\floor{m/p}} \frac{p^{-k}}{(m-pk)!k!} \biggr) \Bigl( \frac{u_i+1}{d} \Bigr)_r (-1)^r \hat{a}_i^{m-r}. \\
+\intertext{Using that $m-r = (p-1)r + \bigl(p(u_i+1) - (v_i+1)\bigr)/d$, we arrive at}
+\pi^{v'-u'} \prod_{i=0}^n \pi^{(p (u_i + 1) - (v_i + 1))/d} \hat{a}_i^{(p (u_i + 1) - (v_i + 1))/d} \sum_{m,r} \biggl( \sum_{k=0}^{\floor{m/p}} \frac{p^{r-k}}{(m-pk)!k!} \biggr) \Bigl( \frac{u_i+1}{d} \Bigr)_r \\
+\intertext{and finally}
+(-p)^{u'} \prod_{i=0}^n \hat{a}_i^{(p (u_i + 1) - (v_i + 1))/d} \sum_{m,r} \Bigl( \frac{u_i+1}{d} \Bigr)_r \sum_{k=0}^{\floor{m/p}} \frac{p^{r-k}}{(m-pk)!k!},
+\end{gather*}
+as required.
+\end{proof}
+
+In particular, Theorem~\ref{thm:alpha} implies that 
+$\alpha_{u+1, v+1} \in \mathbf{Q}_p$.  Our next aim is to obtain 
+expressions for $\alpha_{u+1,v+1}$ which are defined over 
+$\mathbf{Z}_p$.  But before progressing, we collect a few 
+intermediate results which we will refer to later.
+
+\begin{prop} \label{prop:mpr1}
+Let $u, v \in B_1 \cup \dotsb \cup B_n$, $i \in \{0,\dotsc,n\}$ and 
+let $m, r \geq 0$ satisfy $d(m-pr) = p(u_i + 1) - (v_i + 1)$.  Then 
+\begin{equation*}
+0 \leq m - p r \leq \frac{p(d-1)-1}{d}.
+\end{equation*}
+In particular, $m = m(r) = pr + d^{-1}\bigl(p(u_i+1)-(v_i+1)\bigr) \geq 0$.
+\end{prop}
+
+\begin{proof}
+This can be easily verified using that $0 \leq u_i, v_i \leq d - 2$ 
+and $m - pr \in \mathbf{Z}$.
+\end{proof}
+
+\begin{prop} \label{prop:mpr2}
+Let $u, v \in B_1 \cup \dotsb \cup B_n$, $i \in \{0,\dotsc,n\}$ and 
+let $m, r \geq 0$ satisfy $d(m-pr) = p(u_i + 1) - (v_i + 1)$.  Then 
+\begin{equation*}
+r - \floor{\frac{m}{p}} \geq 0.
+\end{equation*}
+\end{prop}
+
+\begin{proof}
+Using the previous proposition,
+\begin{equation*}
+r - \floor{\frac{m}{p}} 
+= - \floor{\frac{m-pr}{p}} 
+\geq - \floor{\frac{p(d-1)-1}{pd}} 
+= -1 + \ceil{\frac{p + 1}{pd}} 
+= 0 
+\end{equation*}
+as $p \geq 2$, $d \geq 2$.
+\end{proof}
+
+\begin{prop} \label{prop:rfac}
+For all integers $u, d \geq 1$ and $r \geq 0$ with $p \nmid d$, 
+\begin{equation*}
+\ord_p\Bigl(\frac{u}{d}\Bigr)_r \geq \frac{r}{p-1} - \floor{\log_p(r) + 1}.
+\end{equation*}
+\end{prop}
+
+\begin{proof}
+Let $s_p(r)$ denote the sum of digits in the $p$-adic expansion of~$r$ 
+and observe that $s_p(r) \leq (p-1) \floor{\log_p(r) + 1}$.  Using the 
+fact that $\ord_p\bigl((u/d)_r\bigr) \geq \ord_p(r!)$ from 
+Clark~\citep[Page~265, Case~3]{Clark66} it follows that 
+\begin{equation*}
+\ord_p\Bigl(\frac{u}{d}\Bigr)_r \geq \ord_p(r!) = \frac{r - s_p(r)}{p-1} \geq \frac{r}{p-1} - \floor{\log_p(r) + 1}
+\end{equation*}
+as required.
+\end{proof}
+
+% The case $p = 2$ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{The case $p = 2$}
+
+We first note that in the case when $p = 2$, the expression for 
+$\lambda_m$ in Lemma~\ref{lem:lambdam} can be simplified.
+
+\begin{cor} \label{cor:lambda2}
+Let $p = 2$, let $\pi^{p-1} = -p$ and, for $m \geq 0$, let $\lambda_m$ 
+be the coefficient of $z^m$ in the power series expansion of 
+$\exp \pi (z - z^p)$ in $\mathbf{Q}_p[[z]]$.  Then 
+\begin{equation*}
+\lambda_m = (-1)^m \sum_{k=0}^{\floor{m/p}} \frac{p^{m - k}}{(m - pk)! k!}.
+\end{equation*}
+\end{cor}
+
+\begin{lem} \label{lem:mu2}
+Let $p = 2$ and define a sequence $\bigl(\mu_m^{(2)}\bigr)$ by 
+\begin{equation*}
+\mu_m^{(2)} = 
+    \sum_{k=0}^{\floor{m/2}} \frac{2^{\floor{3m/4} - \nu_m - k}}{(m-2k)! k!}
+\end{equation*}
+where $\nu_m$ is equal to one whenever $m = 3, 7$ and zero otherwise, 
+and we more simply write $\mu_m =\mu_m^{(2)}$ whenever this does not 
+cause confusion.  Then $\mu_m \in \mathbf{Z}_p$ for all $m \geq 0$.
+\end{lem}
+
+\begin{proof}
+In the two cases $m = 3, 7$ we explicitly compute the values of 
+$\mu_m$ as $4/3$ and $232/315$.  Now suppose that $m \neq 3, 7$. 
+From Corollary~\ref{cor:lambda2} we obtain that 
+\begin{equation*}
+\ord_2 \bigl(\mu_m\bigr) 
+    = \floor{3m/4} - m + \ord_2(\lambda_m).
+\end{equation*}
+Using the bound $\ord_p(\lambda_m) \geq \bigl((p-1)/p^2\bigr) m$ from 
+Dwork~\citep[Pages~55--57]{Dwork62}, we obtain the lower bound 
+\begin{equation*}
+\ord_2 \bigl(\mu_m\bigr) 
+    \geq \floor{3m/4} - m + \ceil{\frac{m}{4}} = 0. \qedhere
+\end{equation*}
+\end{proof}
+
+\begin{rem}
+The expression $\mu_m$, $m \neq 3, 7$, can be computed efficiently 
+modulo~$p^{\tilde{N}}$ via
+\begin{equation*}
+\mu_m = \frac{2^{\floor{3m/4}}}{m!} 
+    \sum_{k=0}^{\floor{m/2}} \frac{m!}{2^k (m-2k)! k!}
+\end{equation*}
+using only one $p$-adic inversion.  We observe that the summands are 
+integers of size $\mathcal{O}(m \log m)$ bits, which allows us to 
+avoid performing intermediate reductions modulo~$p^{\tilde{N}}$.
+\end{rem}
+
+\begin{thm} \label{thm:alpha2}
+Let $p = 2$. 
+Continuing with the notation set up in this chapter, let 
+$u, v \in \mathbf{Z}^{n+1}$ be such that 
+$x^u, x^v \in B_1 \cup \dotsb \cup B_n$ and satisfy, 
+for all $i$, $p (u_i + 1) \equiv v_i + 1 \pmod{d}$. 
+Then $\alpha_{u+1,v+1}$ can be expressed as 
+\begin{equation} \label{eq:alpha2.0}
+\alpha_{u+1,v+1} = (-2)^{u'} \prod_{i=0}^n \sum_{m,r} 
+    \Bigl(\frac{u_i+1}{d}\Bigr)_r 2^{-\floor{(m+1)/4}+\nu_m} \mu_m, 
+\end{equation}
+and $\alpha_{u+1,v+1}$ is a $p$-adic integer.
+\end{thm}
+
+\begin{proof}
+The expression for $\alpha_{u+1,v+1}$ is an immediate consequence 
+of Theorem~\ref{thm:alpha} and Lemma~\ref{lem:mu2}, together with 
+Proposition~\ref{prop:mpr1} implying $0 \leq m - 2r \leq 1$ and 
+hence $r = \floor{m/2}$.  It remains to prove that 
+$\alpha_{u+1,v+1}$ is a $p$-adic integer.  Following Lemma~\ref{lem:mu2}, 
+it suffices to show that the valuation of the factor 
+\begin{equation*}
+\Bigl(\frac{u_i+1}{d}\Bigr)_r 2^{- \floor{(m+1)/4} + \nu_m}
+\end{equation*}
+in each summand is non-negative.  From the proof of 
+Proposition~\ref{prop:rfac} we obtain that 
+\begin{equation} \label{eq:alpha2.1}
+\ord_p \biggl( \Bigl(\frac{u_i+1}{d}\Bigr)_r 2^{- \floor{(m+1)/4} + \nu_m} \biggr)
+\geq \ord_p\Bigl(\floor{\frac{m}{2}}!\Bigr) - \floor{\frac{m+1}{4}} + \nu_m.
+\end{equation}
+Applying Proposition~\ref{prop:rfac}, we see that this is bounded 
+below by 
+\begin{equation*}
+\floor{\frac{m}{2}} - \floor{\frac{m+1}{4}} - \floor{\log_2 m}
+\end{equation*}
+which is non-negative whenever $m \geq 12$.  In the remaining 
+cases $m = 0, \dotsc, 11$, we explicitly verify that the 
+lower bound in~\eqref{eq:alpha2.1} is non-negative.
+\end{proof}
+
+\begin{rem}
+We observe that in equation~\eqref{eq:alpha2.0} the exponent 
+$-\floor{(m+1)/4}+\nu_m$ is non-positive for each value $m \geq 0$, 
+which suggests the computational question of how to determine the 
+sequence of factors 
+\begin{equation*}
+\Bigl(\frac{u_i+1}{d}\Bigr)_r 2^{- \floor{(m+1)/4} + \nu_m}
+\end{equation*}
+to $p$-adic precision $\tilde{N}$ without intermediate precision loss.
+To simplify our notation slightly, suppose we wish to compute the sequence
+\begin{equation*}
+f_r = 2^{- \floor{(m+1)/4} + \nu_m} \prod_{j=0}^{r-1} (u + j d)
+\end{equation*}
+for all $r \geq 0$, where $m(r) = m(0) + 2r$, $m(0) \in \{0,1\}$, 
+$u$ is a positive integer and $d$ is a positive odd integer.
+Explicitly, we find that this sequence satisfies 
+\begin{align*}
+f_0 & = 1, \\
+f_1 & = u, \\
+f_5 & = \begin{cases}
+        \displaystyle \tfrac{1}{4} \bigl( u (u + d) (u + 2d) (u + 3d) (u + 4d) \bigr)
+            & \text{if $m(0)=0$,} \\
+        \displaystyle \tfrac{1}{8} \bigl( u (u + d) (u + 2d) (u + 3d) (u + 4d) \bigr)
+            & \text{otherwise,}
+        \end{cases} \\
+f_r & = f_{r-2} \frac{(u + (r - 2)d)(u + (r - 1)d)}{2}
+\end{align*}
+for all remaining $r \geq 0$.  Since the product in the numerator is 
+an even integer, it is clear that this computation can be carried 
+out without precision loss despite reducing previous values of~$f_r$ 
+modulo~$p^{\tilde{N}}$.
+\end{rem}
+
+% The case of odd primes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{The case of odd primes}
+
+\begin{lem} \label{lem:mup}
+Let $p \geq 3$ be an odd prime and define a sequence 
+$\bigl(\mu_m^{(p)}\bigr)$ by 
+\begin{equation*}
+\mu_m^{(p)} = \sum_{k=0}^{\floor{m/p}} \frac{p^{\floor{m/p} - k}}{(m-pk)! k!}, 
+\end{equation*}
+where we write $\mu_m = \mu_m^{(p)}$ when the prime can be identified 
+from the context.  Then $\mu_m \in \mathbf{Z}_p$ for all $m \geq 0$.
+\end{lem}
+
+\begin{proof}
+It is clear that $\mu_m \in \mathbf{Q}$.  From Lemma~\ref{lem:lambdam} 
+we observe that 
+\begin{equation*}
+\lambda_m = \pi^m p^{- \floor{m/p}} \mu_m.
+\end{equation*}
+Using the bound $\ord_p(\lambda_m) \geq \bigl((p-1)/p^2\bigr) m$ 
+from Dwork~\citep[Pages~55--57]{Dwork62}, it follows that 
+\begin{equation*}
+\ord_p (\mu_m) \geq \frac{p-1}{p^2} m + \floor{\frac{m}{p}} - \frac{m}{p-1}
+\end{equation*}
+Let us write $m = q p + r$ with $0 \leq r \leq p-1$.  As the valuation 
+of $\mu_m$ is an integer, it suffices to show that, for $q \geq 0$, 
+\begin{equation*}
+\frac{p-1}{p} q + q - \frac{q p + p - 1}{p - 1} > -1,
+\end{equation*}
+which is equivalent to 
+\begin{equation*}
+\Bigl( \frac{p-1}{p} + 1 - \frac{p}{p - 1} \Bigr) q > 0.
+\end{equation*}
+Dividing by $q$ and multiplying by $p (p-1)$, we obtain the equivalent 
+condition
+\begin{equation*}
+p^2 - 3p + 1 > 0
+\end{equation*}
+which holds true provided that $p \geq 3$.
+\end{proof}
+
+\begin{rem} \label{rem:01-03-mup}
+The expression $\mu_m$ can be computed efficiently 
+modulo~$p^{\tilde{N}}$ via
+\begin{equation*}
+\mu_m = \frac{p^{\floor{m/p}}}{m!} 
+    \sum_{k=0}^{\floor{m/p}} \frac{m!}{p^k (m-pk)! k!}
+\end{equation*}
+using only one $p$-adic inversion.  We observe that the summands are 
+integers of size $\mathcal{O}(m \log m)$ bits, which allows us to 
+avoid performing intermediate reductions modulo~$p^{\tilde{N}}$.
+\end{rem}
+
+\begin{thm} \label{thm:alphap}
+Let $p \geq 3$.  Continuing with the notation set up in this chapter, 
+let $u, v \in \mathbf{Z}^{n+1}$ be such that 
+$x^u, x^v \in B_1 \cup \dotsb \cup B_n$ and satisfy, 
+for all $i$, $p (u_i + 1) \equiv v_i + 1 \pmod{d}$. 
+Then 
+\begin{equation} \label{eq:alphap.0}
+\alpha_{u+1,v+1} = (-p)^{u'} \prod_{i=0}^n 
+    \hat{a}_i^{(p (u_i + 1) - (v_i + 1))/d} \sum_{m,r} 
+    \Bigl(\frac{u_i+1}{d}\Bigr)_r p^{r - \floor{m/p}} \mu_m
+\end{equation}
+where $m, r \geq 0$ satisfy $p (u_i + 1) - (v_i + 1) = d (m - pr)$. 
+In particular, $\alpha_{u+1, v+1} \in \mathbf{Z}_p$. 
+\end{thm}
+
+\begin{proof}
+This follows from Theorem~\ref{thm:alpha}, Proposition~\ref{prop:mpr2} 
+and Lemma~\ref{lem:mup}.
+\end{proof}
+
+% Description of the algorithm %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Description of the algorithm}
+
+Up to this point, the double sum over $m,r$ in our expressions 
+for $\alpha_{u+1,v+1}$ has been an infinite sum.  We now present 
+a convergence result, which will allow us to derive a finite 
+expression for $\alpha_{u+1,v+1}$ modulo $p^{\tilde{N}}$.
+
+\begin{lem} \label{lem:log}
+Given integers $b,c \geq 2$ and defining $x = c + \log_b c + 1$ 
+we have that, for all real numbers $y \geq x$, 
+\begin{equation*}
+y - \log_b y \geq c.
+\end{equation*}
+\end{lem}
+
+\begin{proof}
+We first note that the function $y \mapsto y - \log_b y$ is increasing 
+for $y \geq 2$ because it has derivative $1 - \log_b(e)/y > 0$.  Thus, it 
+suffices to verify the result for $x$.  Indeed, as $c \geq 2$ we have 
+that 
+\begin{gather*}
+\log_b c + 1 \leq c \\
+\intertext{and hence}
+c + \log_b c + 1 \leq b^{\log_b c + 1} \\
+\intertext{Taking logarithms to base $b$ and rearranging, we obtain}
+c + \log_b c + 1 - \log_b \bigl(c + \log_b c + 1\bigr) - c \geq 0
+\end{gather*}
+as required.
+\end{proof}
+
+\begin{prop}
+Continuing with the notation set up in this chapter, in order to compute 
+$\alpha_{u+1,v+1} \bmod p^{\tilde{N}}$ it suffices to restrict the inner 
+sum to pairs $m,r \geq 0$ such that $m \leq M = M(\tilde{N}, p)$ where 
+\begin{equation*}
+M = \floor{ p^2 \biggl( \frac{\tilde{N}}{p-1} 
+            + \log_p\Bigl(\frac{\tilde{N}}{p-1} + 2\Bigr) + 3 \biggr) }.
+\end{equation*}
+\end{prop}
+
+\begin{proof}
+This follows from~\citep[\S 6.2]{Lau04} and Lemma~\ref{lem:log}.
+\end{proof}
+
+Finally, we describe how to compute the matrix~$\Phi$ representing 
+the action of $p^{-1} \Frob_p$ on $\Hrig^{n}(U)$ using our previous 
+results.
+
+\begin{prop}
+The valuation of $(u'-1)! \alpha_{u+1,v+1}$ is bounded from above by 
+\begin{equation*}
+\ord_p\bigl((u'-1)! \alpha_{u+1,v+1}\bigr) 
+    \leq \ord_p\bigl((n-1)!\bigr) + n + \delta
+\end{equation*}
+where $\delta = \ord_p\bigl((n-1)!\bigr) + (n+1) \floor{\log_p(n-1)}$. 
+\end{prop}
+
+\begin{proof}
+Recall from Gerkmann~\citep[Lemma~3.3]{Gerkmann2007} that the valuations 
+of the entries of the matrix~$\Phi$ are bounded from below by $-\delta$. 
+Thus, by Theorem~\ref{thm:01-03-diagfrob}, 
+\begin{equation*}
+-\delta \leq \ord_p\bigl((v'-1)!\bigr) + n 
+           - \ord_p\bigl((u'-1)! \alpha_{u+1,v+1}\bigr)
+\end{equation*}
+Noting that $d v' = \sum_{i=0}^n (v_i + 1) \leq n d$ and 
+hence $v' \leq n$, the result follows.
+\end{proof}
+
+This allows us to formalise the procedure for computing the 
+entries of~$\Phi$ modulo~$p^N$ in Algorithm~\ref{alg:01-03-diagfrob} 
+below.
+
+\begin{algorithm}
+\caption{Compute the matrix for $p^{-1} F_p$ on $\HdR^n(\mathfrak{U})$}
+\label{alg:01-03-diagfrob}
+\begin{algorithmic}
+\vspace{1mm}
+\Require Polynomial $a_0 x_0^d + \dotsb + a_n x_n^d$, 
+         prime~$p$, precision~$N \geq 0$.
+\Ensure  Matrix for $p^{-1} F_p$ on $\HdR^n(\mathfrak{U})$ modulo $p^N$.
+\Procedure{DiagFrob}{$n, d, p, N, a_0, \dotsc, a_n$}
+\begin{enumerate}
+\item Determine the numbers 
+      $C = C(n,p) = n + 2 \ord_p((n-1)!) + (n+1) \floor{\log_p(n-1)}$, 
+      $\tilde{N} = N - n + 2 C$, $M = M(\tilde{N}, p)$, and 
+      $R = R(\tilde{N}, p) = \floor{M/p}$.
+\item Precompute the Teichm\"uller lifts $\hat{a}_0, \dotsc, \hat{a}_n$, 
+      and the sequences $(d^{-r})_{r=0}^R$, and $(\mu_m)_{m=0}^{M}$ 
+      to precision~$\tilde{N}$.
+\item For each monomial $u = (u_0, \dotsc, u_n) \in B_1 \cup \dotsb \cup B_n$, 
+      determine the unique monomial $v = (v_0, \dotsc, v_n)$ such that 
+      $v_i = p (u_i + 1) - 1 \bmod{d}$.  Use the following steps to 
+      compute the entry at position $(u,v)$ in the matrix.
+\item Compute the expression $x_1 = (-1)^{u'+v'} (v'-1)! p^n$ as an 
+      exact integer and observe that \mbox{$\ord_p(x_1) \geq n$}.
+\item Compute the expression $x_2 = (u' - 1)! \alpha_{u+1,v+1}$ to 
+      precision~$\tilde{N}$ using equation~\eqref{eq:alpha2.0} or 
+      \eqref{eq:alphap.0} depending on whether $p$ is even or odd. 
+\item Compute the inverse $x_2^{-1}$ to precision $N - n$.
+\item Finally, compute the product $x_1 x_2^{-1}$ to precision~$N$.
+\end{enumerate}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{thm} \label{thm:dm-diagfrob-complexity1}
+The time complexity of Algorithm~\ref{alg:01-03-diagfrob} is given 
+by 
+\begin{equation*}
+p \tilde{N}^2 M\bigl(p \tilde{N} \log (p \tilde{N})\bigr)
+    + d^n n \bigl( M(\log d) + (\tilde{N} + \log p) M(\tilde{N} \log p) \bigr)
+\end{equation*}
+where $M(-)$ denotes the complexity of integer multiplication and 
+$\tilde{N}$ is $\mathcal{O}(N + n \log_p n)$.
+\end{thm}
+
+\begin{proof}
+We consider each of the steps in Algorithm~\ref{alg:01-03-diagfrob}. 
+We can ignore the computational effort in {Step~(i)}, but observe 
+that $\tilde{N} \in \mathcal{O}(N + n \log_p n)$, 
+$M \in \mathcal{O}(p \tilde{N})$, and $R \in \mathcal{O}(\tilde{N})$.  
+
+In {Step~(ii)}, we compute $n+1$ Teichm\"uller lifts with an 
+overall complexity of $\mathcal{O}(n (\log p) M(\tilde{N} \log p))$. 
+The computation of the sequence $(d^{-r})_{r=0}^{R}$ requires 
+one reduction of $d$ modulo $p^{\tilde{N}}$, one $p$-adic inversion 
+and $R-1$~products to precision~$\tilde{N}$, yielding 
+$\mathcal{O}\bigl(M(\log d) + (\log \log p) M(\log p) + \tilde{N} M(\tilde{N} \log p)\bigr)$. 
+Finally, we carry out the computation of $(\mu_m)_{m=0}^{M}$ following 
+Remark~\ref{rem:01-03-mup}, which requires time 
+$\mathcal{O}\bigl(p \tilde{N}^2 M(p \tilde{N} \log(p \tilde{N}))\bigr)$.
+
+The following {Steps~(iii) through (vii)} are executed 
+$\dim \Hrig^{n}(U)$ times, where this dimension 
+is $\mathcal{O}(d^n)$.
+The time complexity of {Step~(iii)} is 
+$\mathcal{O}\bigl(n M(\log \max\{p,d\})\bigr)$.
+We observe that we can ignore {Step~(iv)}.
+Step~(v) involves an $(n+1)$-fold product of series 
+with~$\mathcal{O}(R)$ terms modulo~$p^{\tilde{N}}$, where each summand 
+requires an absolutely bounded number of products, as well as 
+$n+1$~exponentiations of Teichm\"uller lifts with exponents given 
+by $d^{-1} \bigl(p (u_i+1) - (v_i+1)\bigr) < p$.  Computing the 
+exponents has complexity $\mathcal{O}(M(\log \max\{p,d\}))$ and 
+we note that we may ignore the update of the term 
+\mbox{$\bigl((u_i+1)/d\bigr)_r$} throughout the summation 
+assuming we have computed the reduction of $d \bmod{p^{\tilde{N}}}$ 
+once and for all earlier.  Therefore, the complexity of each 
+invocation of {Step~(v)} is 
+$\mathcal{O}\bigl( n M(\log d) + n (R + \log p) M(\tilde{N} \log p)\bigr)$.  
+The $p$-adic inverse in {Step~(vi)} requires time 
+$\mathcal{O}\bigl((\log \log p) M(\log p) + M(\tilde{N} \log p)\bigr)$.
+Finally, we can ignore the product in {Step~(vii)}.  
+Thus, the aggregate time complexity of {Steps~(iii)} through {(vii)} 
+is given by 
+$\mathcal{O}\bigl(d^n n \bigl( M(\log d) + (\tilde{N} + \log p) M(\tilde{N} \log p) \bigr)\bigr)$.
+\end{proof}
+
+Although the current implementation of Algorithm~\ref{alg:01-03-diagfrob} 
+performs very well in practical applications, its time complexity is 
+quasi-cubic in the $p$-adic precision~$N$, which is \emph{not} optimal.  
+Both of these aspects are due to the use of the sequence $(\mu_m)_{m=0}^{M}$ 
+defined over $\mathbf{Z}_p$ instead of 
+the coefficients $(\lambda_m)_{m=0}^{M}$ defined over $\mathbf{Q}_p(\pi)$. 
+However, we can achieve a better time complexity by utilising fast 
+exponentials of power series:
+
+\begin{thm} \label{thm:dm-diagfrob-complexity2}
+There exists an algorithm for computing the matrix for the 
+action of $p^{-1} \Frob_p$ on $\Hrig^{n}(U)$ in time complexity 
+\begin{equation*}
+(M \log M \log \log M) (p \log p) M(\tilde{N} \log p) 
++ d^n n \bigl( M(\log d) 
+              + \tilde{N} (p \log p) M(\tilde{N} \log p) \bigr)
+\end{equation*}
+where $M(-)$ denotes the complexity of integer multiplication 
+and $\tilde{N} \in \mathcal{O}(N + n \log_p n)$, 
+$M \in \mathcal{O}(p \tilde{N})$.
+\end{thm}
+
+\begin{proof}
+The key idea is to slightly modify Algorithm~\ref{alg:01-03-diagfrob} 
+and use equation~\eqref{eq:alpha}, working directly with the sequence 
+$(\lambda_m)_{m=0}^{M}$.  As we will be using operations in the 
+totally ramified extension~$\mathbf{Q}_p(\pi)$ to 
+$p$-adic precision~$\tilde{N}$, we remark that the cost of 
+an arithmetic operation in this ring is 
+$\mathcal{O}\bigl((p \log p) M(\tilde{N} \log p)\bigr)$, 
+achieved by polynomial multiplication based on the fast Fourier 
+transform.
+
+We first observe that the valuation of the summands in 
+equation~\eqref{eq:alpha} can be bounded by 
+$\ord_p \bigl(\lambda_m (u_i / d)_r (-1)^r \pi^{-r} {\hat{a}_i}^{m-r} \bigr) \geq - 1/2$.
+As the only term with negative valuation is $\pi^{-r}$ and 
+$R \in \mathcal{O}(\tilde{N})$, it suffices to precompute 
+the sequences $(\lambda_m)_{m=0}^{M}$ and $(d^{-r})_{r=0}^{R}$ 
+to $p$-adic precision $\tilde{N}$.  While the computation 
+of the latter remains unchanged, the computation of the former 
+can be improved significantly using fast exponentials of 
+power series in $\mathbf{Q}_p(\pi)[[z]]$ as described by 
+Bernstein~\citep[\S 9.3]{Bernstein2008}.  This allows for 
+computing the sequence $(\lambda_m)_{m=0}^{M}$ in 
+$\mathcal{O}\bigl( (M \log M \log \log M) \bigr)$ operations 
+in~$\mathbf{Q}_p(\pi)$ to precision~$\tilde{N}$.  The only 
+remaining change to our analysis of Algorithm~\ref{alg:01-03-diagfrob} 
+occurs in {Step~(v)}, where for each matrix entry we have to consider 
+$\mathcal{O}(n R)$ multiplications in~$\mathbf{Q}_p(\pi)$ instead 
+of~$\mathbf{Z}_p$.
+\end{proof}
+
+\begin{rem}
+The complexity estimate in Theorem~\ref{thm:dm-diagfrob-complexity2} 
+is an improvement over that presented by Lauder~\citep[\S 10]{Lau04a}.
+\end{rem}
+
+% Examples %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Examples}
+
+We conclude this chapter by presenting three examples, demonstrating the 
+relevance of the improvements in practical computations.  The first two 
+allow us to compare our implementations with timings reported by 
+Gerkmann~\citep{Gerkmann2007}, and the third example features an increase 
+in various parameters.
+
+Firstly, let us consider the surface given by 
+\begin{equation*}
+x_0^4 + x_1^4 + x_2^4 + x_3^4 = 0
+\end{equation*}
+over $\mathbf{F}_3$ and aim to compute the matrix~$\Phi$ 
+to precision $N = 374$.
+
+We find that we need to compute the expression $\alpha_{u+1,v+1}$ to 
+precision $\tilde{N} = 377$ and are led to compute the terms $\mu_m$ for 
+$m \leq 1768$.
+
+In~\citep[\S 7.4]{Gerkmann2007}, Gerkmann considers this example 
+and reports a runtime of $45.26$~minutes.  In contrast, we are able 
+to compute this matrix in $0.55$~seconds, of which $0.39$~seconds are 
+spent in the precomputation of the sequence~$(\mu_m)$, an improvement 
+of a factor of nearly~$5,000$.
+
+Secondly, we consider a quintic surface over $\mathbf{F}_2$, 
+\begin{equation*}
+x_0^5 + x_1^5 + x_2^5 + x_3^5 = 0,
+\end{equation*}
+and we aim to compute the matrix~$\Phi$ to precision~$N = 355$.  This 
+leads us to compute $\alpha_{u+1,v+1}$ to precision~$\tilde{N} = 370$, 
+which requires us to compute $\mu_{m}$ up to $M = 1528$.
+
+Gerkmann~\citep[\S 7.6]{Gerkmann2007} reports a runtime of 
+$64.13$~minutes.  In contrast, we are able to compute this matrix 
+in $0.32$~seconds, of which $0.27$~seconds are spent in the precomputation 
+of the sequence~$(\mu_m)$, an improvement by a factor of over~$12,000$.
+
+For the third and final example, we consider the sextic threefold 
+over~$\mathbf{F}_{97}$ given by 
+\begin{equation*}
+x_0^6 + 2 x_1^6 + 3 x_2^6 + 4 x_3^6 + 5 x_4^6
+\end{equation*}
+and compute the matrix~$\Phi$ to precision~$N = 500$.  This leads to the 
+other parameters $\tilde{N} = 504$ and $M = 87033$.  We also observe 
+that $\dim \HdR^{n}(\mathfrak{U}) = 520$.  The precomputation requires 
+$0.01$~seconds for the sequence $d^{-r}$ and $9.67$~hours for the 
+sequence~$\mu_m$.  After this, we can determine the entries of the 
+Frobenius matrix in another $30.86$~seconds.
+

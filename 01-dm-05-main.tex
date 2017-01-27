@@ -1,0 +1,507 @@
+% Chapter:  From the differential system to the zeta function %%%%%%%%%%%%%%%%%
+
+In this chapter we describe the remaining steps of the deformation method:  
+how to use the differential system governed by the Gauss--Manin connection 
+matrix and the action of Frobenius on the initial fibre $\Hrig^{n}(U_0)$ 
+to determine the action of Frobenius on the fibre~$\Hrig^{n}(U_{t_1})$ 
+and hence the zeta function of the hypersurface~$X_{t_1}$.
+We point out that there are essentially no original contributions from the 
+author;  we present the work of Lauder~\citep{Lau04} and also follow the 
+description by Gerkmann~\citep{Gerkmann2007}, focussing on the details 
+relevant to explicit computations.  The improvements in practical runtimes 
+that we observe in this part of the algorithm are due to improved estimates 
+of certain $p$-adic valuations by Kedlaya~\citep{Kedlaya2010} and estimates 
+of pole orders by Kedlaya and Tuitman~\citep{KedlayaTuitman2012} as well as 
+implementation details.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{$p$-Adic differential system and local expansion of Frobenius}
+
+Recall that we let $\Phi$ denote the matrix for the $\sigma$-semilinear action 
+of~$p^{-1} \Frob_p$ on $\Hrig^{n}(U/S)$, where $\sigma$ is the standard lift of the 
+$p$th-power Frobenius to~$\mathbf{Q}_q$ and~$\mathbf{Q}_q(t)$ sending 
+$t \mapsto t^p$, and $M$ the matrix for the Leibniz-linear connection on 
+$\HdR^n(\mathfrak{U}/\mathfrak{S})$.
+As described for example by Gerkmann~\citep[\S 5]{Gerkmann2007}, these 
+matrices satisfy the following differential system,
+\begin{equation*}
+\Bigl(\frac{d}{dt} + M\Bigr) \Phi = p t^{p-1} \Phi \sigma(M).
+\end{equation*}
+Our first goal, discussed in this section, is the computation of 
+a power series expansion of~$\Phi$ around the origin, satisfying 
+the above differential equation and the initial condition that~$\Phi_0$ 
+be the matrix for the action of $p^{-1} \Frob_p$ on $\Hrig^n(U_0)$.
+We begin by observing that, upon setting 
+\begin{equation*}
+\Phi = C \Phi_0 \sigma(C)^{-1},
+\end{equation*}
+the above differential system is equivalent to the homogeneous system 
+\begin{equation} \label{eq:01-GMDE-Homogenous}
+\Bigl(\frac{d}{dt} + M\Bigr) C = 0
+\end{equation}
+with the initial condition that $C(0)$ is the identity matrix.  Let us write 
+\begin{equation*}
+M(t) = \frac{B(t)}{r(t)}
+\end{equation*}
+where $B(t) = \sum_{i=0}^{\deg(B)} B_i t^i$ is a matrix over $\mathbf{Q}[t]$ 
+with $\deg(B) = \max_{i,j} \deg(B_{ij})$ and $r(t) \in \mathbf{Z}[t]$ is the 
+\emph{Macaulay resultant} for the polynomial~$P$.  We can now obtain a 
+power series solution $C(t) = \sum_{i \geq 0} C_i t^i$ around $t=0$ for 
+\begin{equation*}
+r(t) \frac{dC}{dt} + B(t) C(t) = 0
+\end{equation*}
+using the recursion 
+\begin{equation*}
+C_{i+1} = \frac{-1}{r_0 (i+1)} \biggl(
+    \sum_{j=\max{\{0,i-\deg(B)\}}}^i B_{i-j} C_j + 
+    \sum_{j=\max{\{0,i-\deg(r)\}}+1}^i r_{i-j+1} j C_j \biggr).
+\end{equation*}
+where we recall from Notation~\ref{not:01-02-main} that by 
+assumption $r_0 \neq 0 \pmod{p}$ and so, in particular, $r_0 \neq 0$.
+
+From a computational perspective, we are only interested in a power 
+series solution to some $p$-adic and $t$-adic precisions $N$ and $K_2$, 
+respectively, as discussed in the next two sections.  As such we need 
+to understand the loss of $p$-adic precision involved in the computation 
+of $C_0, C_1, \dotsc, C_{K_2-1}$.  Specifically, let $D_0, D_1, \dotsc$ 
+denote an approximation defined by $D_0 = I$ and 
+\begin{equation*}
+D_{i+1} = \frac{-1}{r_0 (i+1)} \biggl(
+    \sum_{j=\max{\{0,i-\deg(B)\}}}^i B_{i-j} D_j + 
+    \sum_{j=\max{\{0,i-\deg(r)\}}+1}^i r_{i-j+1} j D_j \biggr) + 
+    p^{\tilde{N}} E_{i+1},
+\end{equation*}
+where $(E_i)_{i \geq 1}$ is a sequence of $p$-adically integral matrices. 
+
+The relationship between the desired precision~$N$ and the working 
+precision~$\tilde{N}$ is described by Lauder~\citep[Theorem~5.1]{Lauder2006}, 
+but this can be improved significantly by including recent bounds on the 
+valuation of $C_0, C_1, \dotsc$ by Kedlaya~\citep{Kedlaya2010}.
+
+\begin{lem} \label{lem:01-FrobBound}
+Recall that the matrix~$\Phi$ for the action of $p^{-1} \Frob_p$ 
+on $\Hrig^{n}(U/S)$ has entries in 
+$\mathbf{Q}_p\langle t, r(t)^{-1}\rangle^{\dagger}$, 
+and let $\Phi_t$ denote the matrix for the action of $p^{-1} \Frob_p$ 
+on $\Hrig^{n}(U_t)$ with entries in $\mathbf{Q}_p$.  Let us set 
+\begin{align*}
+r & = \ord_p((n-1)!), \\
+s & = (n + 1) \floor{\log_p(n-1)}.
+\end{align*}
+and define  $\delta = r + s$.  The $p$-adic valuation of the 
+matrices~$\Phi$ and $\Phi_t$ is then at least~$-\delta$.
+\end{lem}
+
+\begin{proof}
+This follows from Gerkmann~\citep[Lemma~3.3]{Gerkmann2007}.
+\end{proof}
+
+\begin{thm} \label{thm:valC}
+For all $i \geq 0$, the $p$-adic valuation of the matrix~$C_i$ 
+can be bounded by 
+\begin{equation*}
+\ord_p(C_i) \geq - \bigl(2 \delta + (n - 1)\bigr) \ceil{\log_p i}.
+\end{equation*}
+\end{thm}
+
+\begin{proof}
+Let us recall from Lemma~\ref{lem:01-FrobBound} that 
+$\ord_p(\Phi) \geq -\delta$, and hence $\ord_p(p^{n-1}\Phi^{-1}) \geq -\delta$ 
+by Poincar\'e duality.  Thus, we see that 
+\begin{equation*}
+\ord_p(\Phi) + \ord_p(\Phi^{-1}) \geq - 2 \delta - (n-1)
+\end{equation*}
+and the bound follows now from Theorem~{18.3.3} by 
+Kedlaya~\citep{Kedlaya2010}.
+\end{proof}
+
+\begin{rem}
+Kedlaya~\citep[Remark~18.3.4]{Kedlaya2010} also includes another bound,
+\begin{equation*}
+\ord_p(C_i) \geq (b - 1) \ord_p(M) 
+            - \bigl(2 \delta + (n - 1)\bigr) \floor{\log_p i},
+\end{equation*}
+which is better than the estimate used in the previous theorem whenever 
+$\ord_p(M)$ is positive.
+\end{rem}
+
+\begin{thm}
+Let the sequences of matrices $(C_i)$ and $(D_i)$ over $\mathbf{Q}$ and 
+$\mathbf{Q}_p$, respectively, be defined as above.  Then, for all $i \geq 0$, 
+\begin{equation*}
+\ord_p(C_i - D_i) \geq 
+    \tilde{N} - \Bigl(2 \bigl(2 \delta + (n-1)\bigr) + 1\Bigr) \ceil{\log_p i}.
+\end{equation*}
+\end{thm}
+
+\begin{proof}
+This follows analogously to the result of 
+Lauder~\citep[Theorem~5.1]{Lauder2006}.  
+Indeed, its proof shows more specifically that 
+\begin{equation*}
+\ord_p(C_i - D_i) \geq 
+    \tilde{N} + \min_{k+\ell=i} \Bigl(\ord_p(C_k) + 
+                                      \ord_p(\ell^{-1} C_{\ell-1}^{-1})\Bigr).
+\end{equation*}
+We use the bound from Theorem~\ref{thm:valC} and observe that they 
+also apply to the inverse matrix~$C^{-1}$, as this matrix satisfies 
+the related differential equation 
+\begin{equation} \label{eq:01-GMDE-Dual}
+\Bigl(\frac{d}{dt} - M^t\Bigr) \bigl(C^{-1}\bigr)^t = 0.
+\end{equation}
+The result now follows.
+\end{proof}
+
+\begin{rem}
+In order to determine the power series expansion of the matrix~$\Phi$, 
+we also need to compute the matrix $\sigma(C)^{-1}$.  As we assume that 
+the family~$\mathcal{X}$ of hypersurfaces is defined over $\mathbf{Z}_p$, 
+the connection matrix~$M$ is a matrix over $\mathbf{Q}_p[t,r(t)^{-1}]$ 
+and the local solution~$C$ has entries in~$\mathbf{Q}_p[[t]]$.  
+As $\sigma$ acts trivially on~$\mathbf{Q}_p$, we have that 
+$\sigma(C)^{-1} = C(t^p)^{-1} = C^{-1}(t^p)$. 
+
+The matrix~$C^{-1}$ could be computed using matrix inversion 
+over the ring $\mathbf{Q}_p[[t]]$.  An alternative approach 
+follows from observing that whenever $C$ satisfies 
+equation~\eqref{eq:01-GMDE-Homogenous}, its inverse~$C^{-1}$ 
+satisfies the related differential equation~\eqref{eq:01-GMDE-Dual}. 
+In practice, solving this equation for $C^{-1}$ is typically favourable 
+compared to inverting the matrix~$C$.
+\end{rem}
+
+With $p$-adic approximations to the power series modulo $t^{K_2}$ available 
+for $C$, $\Phi_0$, and $\sigma(C)^{-1}$, we are in a position to determine 
+the power series for $\Phi = C \Phi_0 \sigma(C)^{-1}$.  The final issue 
+to address in this section is the $p$-adic precision that we require for 
+the three matrices $C$, $\Phi_0$, and $C^{-1}$.
+We begin by developing generic bounds on the products of $p$-adic numbers 
+and matrices.
+
+\begin{prop} \label{prop:productval}
+Let $x_1, \dotsc, x_{\ell} \in \mathbf{Q}_p$, where $\ell \geq 2$, 
+be given as $x_i = p^{v_i} u_i$ with $v_i = \ord_p(x_i) \in \mathbf{Z}$ 
+and $u_i \in \mathbf{Z}_p^{\times}$ whenever $x_i \neq 0$ and 
+$u_i = v_i = 0$ otherwise.  Suppose that $N \in \mathbf{Z}$ is given 
+such that $N > \sum_{j=1}^{\ell} v_j$ and, for all $i$, $N > \sum_{j \neq i} v_j$.
+
+Let $\tilde{x}_1, \dotsc, \tilde{x}_{\ell}$ be $p$-adic approximations 
+satisfying $\ord_p(x_i - \tilde{x}_i) \geq N - \sum_{j \neq i} v_j$ 
+for all $i$.  Then 
+\begin{equation*}
+\ord_p(x_1 \dotsm x_{\ell} - \tilde{x}_1 \dotsm \tilde{x}_{\ell}) \geq N.
+\end{equation*}
+\end{prop}
+
+\begin{proof}
+First, note that $x_i \neq 0$ implies that $\tilde{x}_i \neq 0$. 
+Otherwise, if $\tilde{x}_i = 0$ then
+\begin{equation*}
+N - \sum_{j \neq i} v_j \leq \ord_p(x_i - \tilde{x}_i) = \ord_p(x_i) = v_i
+\end{equation*}
+which implies that $N \leq \sum v_j$, a contradiction.
+
+Represent $\tilde{x}_i$ as $p^{\tilde{v}_i} \tilde{u}_i$ with the 
+same convention that $\tilde{u}_i \in \mathbf{Z}_p^{\times}$ unless 
+$\tilde{x}_i = 0$, in which case $\tilde{u}_i = \tilde{v}_i = 0$.  
+We first show that $v_i = \tilde{v}_i$ whenever $x_i \neq 0$.  Indeed, 
+if $v_i \neq \tilde{v}_i$ then 
+\begin{equation*}
+\ord_p(x_i - \tilde{x}_i) = \min\{\ord_p(x_i), \ord_p(\tilde{x}_i)\} \leq \ord_p(x_i) = v_i
+\end{equation*}
+whereas from the assumptions we derive 
+\begin{equation*}
+\ord_p(x_i - \tilde{x}_i) \geq N - \sum_{j \neq i} v_j > v_i,
+\end{equation*}
+a contradiction.
+
+Note that, for all $i$ such that $x_i \neq 0$, the assumption 
+$\ord_p(x_i - \tilde{x}_i) \geq N - \sum_{j \neq i} v_j$ implies that 
+$\ord_p(u_i - \tilde{u}_i) \geq N - \sum_j v_j$.  Specifically, 
+\begin{equation*}
+\ord_p(u_i - \tilde{u}_i) = \ord_p(x_i - \tilde{x}_i) - v_i \geq N - \sum_{j=1}^{\ell} v_j.
+\end{equation*}
+
+Considering the product $x_1 \dotsm x_{\ell}$, we distinguish two 
+cases.  First, assume that $x_i \neq 0$ for all $i$.  We find that 
+\begin{equation*}
+\ord_p(x_1 \dotsm x_{\ell} - \tilde{x}_1 \dotsm \tilde{x}_{\ell}) = 
+    \sum_{j} v_j + \ord_p(u_1 \dotsm u_{\ell} - \tilde{u}_1 \dotsm \tilde{u}_{\ell}) \geq N.
+\end{equation*}
+In the other case, suppose that for some $k < \ell$, $x_1, \dotsc, x_k$ 
+are non-zero and that $x_{k+1}, \dotsc, x_{\ell}$ are all zero.  In 
+particular, $v_{k+1} = \dotsb = v_{\ell} = 0$.  Then 
+\begin{equation*}
+\begin{split}
+\ord_p(x_1 \dotsm x_{\ell} - \tilde{x}_1 \dotsm \tilde{x}_{\ell}) 
+  & = \ord_p(\tilde{x}_1 \dotsm \tilde{x}_{\ell}) \\
+  & \geq v_1 + \dotsb + v_k + N - \sum_{j \neq k+1} v_j + \dotsb + N - \sum_{j \neq \ell} v_j \\
+  & = (\ell - k) N - (\ell - k - 1) (v_1 + \dotsb + v_k) \\
+  & > N. \qedhere
+\end{split}
+\end{equation*}
+\end{proof}
+
+\begin{prop} \label{prop:matrixproductval}
+Let $A_1, \dotsc, A_{\ell}$ be $b \times b$ matrices over $\mathbf{Q}_p$, 
+where $\ell \geq 2$, given as $A_i = p^{v_i} U_i$ with 
+$v_i = \ord_p(A_i) \in \mathbf{Z}$ and at least one entry of $U_i$ a 
+$p$-adic unit $A_i \neq 0$ and $v_i = 0$ and $U_i$ the zero matrix 
+otherwise.  Suppose that $N \in \mathbf{Z}$ is given such that 
+$N > \sum_{j=1}^{\ell} v_j$ and, for all $i$, $N > \sum_{j \neq i} v_j$.
+
+Let $\tilde{A}_1, \dotsc, \tilde{A}_{\ell}$ be $p$-adic approximations 
+satisfying $\ord_p(A_i - \tilde{A}_i) \geq N - \sum_{j \neq i} v_j$ 
+for all $i$.  Then 
+\begin{equation*}
+\ord_p(A_1 \dotsm A_{\ell} - \tilde{A}_1 \dotsm \tilde{A}_{\ell}) \geq N.
+\end{equation*}
+\end{prop}
+
+\begin{proof}
+We can follow the proof of Proposition~\ref{prop:productval}, 
+observing that, for matrices $A$, $B$ over $\mathbf{Q}_p$, 
+we have $\ord_p(A + B) \geq \min \{\ord_p(A), \ord_p(B)\}$.
+\end{proof}
+
+\begin{cor}
+Suppose that $K_2, N_2$ are positive integers such that $N_2$ is greater than 
+the sum of two or three of $\ord_p(\Phi_0)$, $\ord_p\bigl(C \bmod t^{K_2}\bigr)$, 
+and $\ord_p\bigl(C^{-1} \bmod{t^{\ceil{K_2/p}}}\bigr)$.
+In order to compute the power series expansion around the origin 
+of the matrix~$\Phi$ modulo~$t^{K_2}$ to $p$-adic precision~$N_2$, it 
+suffices to compute the matrices $C$, $C^{-1}$ and $\Phi_0$ to 
+$p$-adic precision $N_3$, $N_3'$ and $N_4$, respectively, where 
+\begin{align*}
+N_3  & \geq N_2 + \bigl(2\delta+(n-1)\bigr) \ceil{\log_p \ceil{K_2/p}} + \delta, \\
+N_3' & \geq N_2 + \bigl(2\delta+(n-1)\bigr) \ceil{\log_p K_2} + \delta, \\
+N_4  & \geq N_2 + \bigl(2\delta+(n-1)\bigr) \bigl(\ceil{\log_p K_2} + \ceil{\log_p \ceil{K_2/p}}\bigr).
+\end{align*}
+\end{cor}
+
+\begin{proof}
+This follows from Proposition~\ref{prop:matrixproductval}, the bounds 
+on the valuations of $C$ and $C^{-1}$ from Theorem~\ref{thm:valC} and 
+the bound $\ord_p(\Phi_0) \geq - \delta$ from Lemma~\ref{lem:01-FrobBound}.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Analytic continuation and evaluation}
+\label{sec:01-dm-06-continuation}
+
+In the previous section we described how to compute the matrix~$\Phi$ 
+for the action of $p^{-1} \Frob_p$ on $\Hrig^{n}(U/S)$ 
+as a local power series expansion around $t = 0$.  In order to evaluate it 
+at a second point $t = t_1$, we wish to $p$-adically approximate it 
+using rational functions with denominators a power of $r(t)$, which 
+is possible as the entries of the matrix~$\Phi$ are \emph{overconvergent 
+functions} as defined in Definition~\ref{defn:Overconvergence} and 
+described e.g.\ by Lauder~\citep[\S 3.5]{Lauder2006}.
+
+This step, the analytic continuation of the local expansion, is described 
+by Lauder in~\citep[\S 5.2]{Lauder2006} and the computational details are 
+explained in~\citep[\S 8.1]{Lau04a}.  Combining this step with the subsequent 
+evaluation, our specific problem is the following.  Given a desired $p$-adic 
+precision~$N_2$, we would like to determine integers~$K_1$ and~$K_2$ such 
+that, modulo~$p^{N_2}$, the entries of the matrix $\Psi(t) = r(t)^m \Phi(t)$ 
+truncated modulo~$t^{K_2}$ allow us to compute the matrix $\Phi_{t_1}$ for 
+the action of $p^{-1} F_p$ on $\HdR^{n}(\mathfrak{U}_{t_1})$ as 
+$r(\hat{t_1})^{-1} \Psi(\hat{t_1})$ modulo~$p^{N_2}$.
+
+Besides the work of Lauder~\citep[\S 8.1]{Lau04a}, Gerkmann also described 
+suitable results in~\citep[\S 6]{Gerkmann2007}, however the estimates are 
+not sharp in practice.  There has been recent progress by Kedlaya and 
+Tuitman~\citep[Theorem~2.1]{KedlayaTuitman2012}, which we present in a 
+slightly simplified and weakened form:
+
+\begin{thm} \label{thm:KedlayaTuitman}
+Let $\mathfrak{Z}$ denote the complement of the open dense 
+subscheme $\mathfrak{S}$ of $\mathbf{P}^{1}(\mathbf{Q}_q)$ 
+and let $z$ be an unramified geometric point of $\mathfrak{Z}$ 
+such that $\mathfrak{Z}$ does not contain any other points 
+with the same reduction modulo~$p$.  For a fixed a basis for 
+$\Hrig^n(U/S)$, suppose that the matrix 
+for the connection~$\nabla$ has at most a simple pole at~$z$ 
+and that the exponents $\lambda_1, \dotsc, \lambda_{b}$, 
+which are defined as the eigenvalues of $(t - z) M \vert_{t=z}$ 
+and known to be rational numbers, have non-negative $p$-adic 
+valuation.  Then the matrix~$\Phi$ for the action of $p^{-1} \Frob_p$ 
+has a pole at $z$ of order at most 
+\begin{equation} \label{eq:KedlayaTuitman}
+\max_{i} \lambda_i - p \min_{i} \lambda_i + p g(N)
+\end{equation}
+where $g(N)$ is defined by 
+\begin{equation}
+g(N) = \max\Bigl\{ i \in \mathbf{N} : i - \delta - \bigl(2\delta + (n-1)\bigr) \ceil{\log_p i} < N \Bigr\}.
+\end{equation}
+\end{thm}
+
+\begin{proof}
+See \citep[Theorem~2.1]{KedlayaTuitman2012}.
+\end{proof}
+
+\begin{rem} \label{rem:KedlayaTuitman}
+In practice, it might be convenient to avoid computing the exponents and 
+verifying the hypotheses of the previous theorem.  This is particularly 
+relevant since even when the hypotheses are not satisfied, the required 
+bounds are often closer to the result of Kedlaya and Tuitman than to the 
+estimates provided by Gerkmann.
+
+The contribution of the terms $\max_i \lambda_i - p \min_i \lambda_i$ 
+in equation~\eqref{eq:KedlayaTuitman} typically is small compared to the 
+term~$p g(N_2)$. Therefore, in a heuristic implementation, one 
+could choose e.g.\ $K_1 = 1.1 \times p N_2$ and $K_2 = (\deg(r) + 1) K_1$.
+\end{rem}
+
+Having obtained an expression for the action of~$p^{-1} \Frob_p$ 
+on~$\Hrig^{n}(U_{t_1})$ in terms of rational functions, 
+we conclude this section by describing the evaluation at the fibre 
+$t = t_1$.  Modulo~$p^{N_2}$, the matrix $\Phi_{t_1}$ representing 
+$p^{-1} \Frob_p$ on $\Hrig^{n}(U_{t_1})$ is equal to 
+\begin{equation}
+\Phi_{t_1} = 
+    r(\hat{t}_1)^{-K_1} 
+    \Bigl( r(t)^{K_1} \Phi(t) \bmod{t^{K_2}} \Bigr) \Big\vert_{t=\hat{t}_1} \pmod{p^{N_2}}.
+\end{equation}
+Since, by assumption, $r(t_1)$ is a $p$-adic unit and hence so is 
+$r(\hat{t}_1)^{-K_1}$ we observe that it suffices to compute the 
+Teichm\"uller lift~$\hat{t}_1$ and the matrix~$r(t)^{K_1} \Phi(t)$ 
+over~$\mathbf{Q}_p[t]$ to $p$-adic precision~$N_2$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Recovering zeta functions}
+
+Recall that the zeta function of the hypersurface~$X_{t_1}$ is of the form,
+\begin{equation*}
+Z(X_{t_1},T) = \frac{p(T)^{(-1)^n}}{(1 - T) (1 - qT) \dotsm (1 - q^{n-1}T)}
+\end{equation*}
+where $p(T) = \det \bigl( 1 - T q^{-1} \Frob_q | \HdR^n(\mathfrak{U}_{t_1}) \bigr)$ 
+is a polynomial defined over the integers.
+
+Thus, the remaining two steps in the deformation method are as follows.  
+Firstly, we obtain the matrix of the $q$th-power Frobenius from the matrix of 
+the $p$th-power Frobenius.  Secondly, we compute its reverse characteristic 
+polynomial to suitable \mbox{$p$-adic} precision in order to recover the zeta 
+function.
+
+\subsection{Computing the action of $q^{-1} \Frob_q$ on $\Hrig^{n}(U_{t_1})$}
+
+Let $\Phi_{t_1}$ and $\Phi_{t_1}^{(q)}$ denote the matrices representing the 
+actions of $p^{-1} \Frob_p$ and $q^{-1} \Frob_q$ on~$\Hrig^{n}(U_{t_1})$, 
+respectively.  As the action of $p^{-1} \Frob_p$ is $\sigma$-semilinear, we have 
+that 
+\begin{equation*}
+\Phi_{t_1}^{(q)} = 
+    \Phi_{t_1} \sigma(\Phi_{t_1}) \dotsm \sigma^{a-1}(\Phi_{t_1}),
+\end{equation*}
+where $a = \log_p q$.  Note that the lift of Frobenius~$\sigma$ 
+is valuation preserving and hence the valuations of the matrices 
+$\Phi_{t_1}, \Phi_{t_1}^{\sigma}, \dotsc, \Phi_{t_1}^{\sigma^{a-1}}$ 
+are at least $-\delta$ by Lemma~\ref{lem:01-FrobBound}.
+
+It now follows from Proposition~\ref{prop:matrixproductval} that 
+it suffices to compute the matrix~$\Phi_{t_1}$ to \mbox{$p$-adic} 
+precision~$N_2$ at least \mbox{$N_1 + (a-1) \delta$} in order to 
+determine $\Phi_{t_1}^{(q)}$ to \mbox{$p$-adic} precision~$N_1$.
+
+\subsection{Computing characteristic polynomials}
+
+In this section we address the precision loss when computing the reverse 
+characteristic polynomial $\det(1 - t A)$ of a $b \times b$ matrix~$A$ 
+given to finite precision over $\mathbf{Q}_p$.
+
+In general, from the definition of the determinant function and 
+Proposition~\ref{prop:productval}, it appears that the precision 
+loss could be as great as $(b-1) \ord_p(A)$.  However, in the case 
+of matrices representing the action of Frobenius 
+on $\Hrig^n(U_{t_1})$, much better bounds are available.
+
+\begin{lem} \label{lem:charpoly}
+Define $\delta = \delta(n,p)$ as in Lemma~\ref{lem:01-FrobBound} and 
+suppose that $\tilde{\Phi}_{t_1}^{(q)}$ is an approximation to 
+$\Phi_{t_1}^{(q)}$ with 
+$\ord_p\bigl(\Phi_{t_1}^{(q)}-\tilde{\Phi}_{t_1}^{(q)}\bigr) \geq N + \delta$.
+Then 
+\begin{equation*}
+\ord_p \Bigl( \det\bigl(1 - t \Phi_{t_1}^{(q)}\bigr) 
+            - \det\bigl(1 - t \tilde{\Phi}_{t_1}^{(q)}\bigr) \Bigr) \geq N.
+\end{equation*}
+\end{lem}
+
+\begin{proof} 
+See Gerkmann~\citep[Lemma~3.3, Lemma~3.4]{Gerkmann2007}.
+\end{proof}
+
+The previous lemma allows us to take $N_1 = N_0 + \delta$ in our 
+description of the deformation algorithm.
+
+\subsection{Computing Weil polynomials}
+
+In the final step of the deformation method, we compute the 
+reverse characteristic polynomial $p(T)$ of the matrix $\Phi_{t_1}^{(q)}$, 
+which represents $q^{-1} \Frob_q$ on $\Hrig^n(U_{t_1})$, to some finite 
+$p$-adic precision.  Which precision~$N_0$ is necessary in order to 
+correctly recover the polynomial~$p(T)$ over the integers?
+
+\begin{thm} \label{thm:N0}
+In order to recover $p(T)$ over $\mathbf{Z}$ it suffices to compute 
+an approximation modulo~$p^N$ where 
+\begin{equation*}
+p^N > 2 \max_{0 \leq i \leq b} \binom{b}{i} q^{i (n-1) / 2}.
+\end{equation*}
+Moreover, this can be improved to 
+\begin{equation*}
+p^N > 2 \binom{b}{\floor{b/2}} q^{\floor{b/2} (n-1) / 2}
+\end{equation*}
+provided that the sign $\epsilon = \sgn(\det(F_q))$ of the 
+functional equation for the zeta function is known.
+\end{thm}
+
+\begin{proof}
+This is a slight reformulation of {Theorem~3.2} in~\citep{Gerkmann2007}, 
+which follows readily from its proof.
+\end{proof}
+
+\begin{rem}
+We observe that the sign $\epsilon = \sgn(\det(q^{-1} \Frob_q)) = 1$ 
+whenever $n$ is even.  This can be seen from the statement of the 
+Weil conjectures in Theorem~\ref{thm:01-Zetafunctions}.
+\end{rem}
+
+\begin{rem}
+In the case that $n$ is odd, the sign~$\epsilon$ of the functional 
+equation is unknown a priori.  However, in practice it is often still 
+possible to avoid having to use the greater of the two precisions in 
+Theorem~\ref{thm:N0} by just computing one additional coefficient 
+exactly.  Writing $p(T) = \sum_{i=0}^{b} a_i T^i$, we can recover 
+$a_0, \dotsc, a_{\floor{b/2}+1}$ exactly provided 
+\begin{equation*}
+p^N > 2 \max\biggl\{\binom{b}{\floor{b/2}} q^{\floor{b/2} (n-1) / 2}, 
+                   \binom{b}{\floor{b/2}+1} q^{(\floor{b/2}+1) (n-1)/2} \biggr\}.
+\end{equation*}
+This allows us to determine the sign~$\epsilon$ from the two 
+coefficients $a_{\ceil{b/2}-1}$ and $a_{\floor{b/2}+1}$, provided 
+that they are non-zero, and we can then recover the remaining 
+coefficients using the functional equation.
+\end{rem}
+
+\begin{rem} \label{rem:N0Surfaces}
+In the case of smooth projective surfaces, when $p > 2$ and subject to 
+certain technical conditions, we can often exploit the growing divisibility 
+of the coefficients of $p(T)$ ensured by the Hodge polygon.  For such a surface 
+of degree~$d$, we know that the Hodge numbers $h_{0,2}$, $h_{1,1}$ and $h_{2,0}$ 
+satisfy $h_{0,2} = h_{2,0} = \binom{d-1}{3}$ and $2 h_{0,2} + h_{1,1} = b$. 
+It is now easier to determine the integer coefficients of the 
+polynomial~$q^{h_{0,2}} p(T/q)$ as the roots of the polynomial $p(T/q)$ lie 
+on the unit circle.  This allows us to take 
+\begin{align*}
+N_0 & = a h_{0,2} + \floor{\log_p \biggl( 2 \binom{b}{\floor{b/2}}\biggr)} + 1,\\
+N_1 & = N_0 + a,
+\end{align*}
+where $N_0$ here refers to the required precision for $q^{h_{0,2}} p(T/q)$ 
+and $N_1$ as before refers to the precision required for the matrix 
+representing $q^{-1} \Frob_q$ on $\Hrig^{n}(U_{t_1})$.
+For further details, we refer the reader to 
+Lauder~\citep[\S 9.3.2, Proposition~9.6]{Lauder2006}.
+\end{rem}
+

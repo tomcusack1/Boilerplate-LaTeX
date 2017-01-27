@@ -1,0 +1,378 @@
+% Chapter:  Examples %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In this chapter we present a small selection of computational examples, 
+demonstrating the usefulness of the deformation method for point counting 
+in practice.
+
+We point out that the zeta functions that we compute in our examples 
+are correct.  However, the computations are not \emph{a priori} 
+provably correct as we are using the heuristic $t$-adic bounds from 
+Remark~\ref{rem:KedlayaTuitman}.  In some cases, we explicitly 
+verify the computation by considering the exponents of the 
+connection matrix occurring in Theorem~\ref{thm:KedlayaTuitman}.  
+In other cases, we can rerun the computation with sufficiently 
+increased precisions.  Note that the former verification, applicable 
+when the hypotheses of Theorem~\ref{thm:KedlayaTuitman} are 
+satisfied, is not time-consuming when compared to the 
+remaining parts of the deformation method.  The omission is 
+a consequence of our implementation\footnotemark\ in the C~language 
+on top of FLINT~\citep{FLINT}, lacking the required functionality 
+of root finding algorithms and number field arithmetic that is 
+necessary for the computation of the exponents.  
+
+\footnotetext{The source code is available in a git repository at 
+\url{https://github.com/SPancratz/deformation}.}
+
+For practical purposes, this does not present a problem at all:  we know 
+that the correct output~$p(T)$ is the reverse of a Weil polynomial, that 
+is, it is a polynomial with constant term one and all its roots have 
+the same absolute value.  This property allows us to at least 
+heuristically verify the output, even when computed with insufficient 
+precision.  Further work has been carried out by Kedlaya~\citep{Kedlaya2008} 
+on verifying the correctness of a computation that has been carried out 
+with intermediate $p$-adic precisions too low to be provably correct. 
+The methods investigated and implemented are crucially based on the 
+fact that the polynomial 
+\mbox{$\det\bigl(1 - T q^{-1} \Frob_q | \HdR^{n}(\mathfrak{U}_{t_1})\bigr)$} 
+is the reverse of a Weil polynomial, and in particular that its 
+roots all have absolute value~$q^{(1-n)/2}$ and that the bottom 
+coefficients can be obtained correctly even with low $p$-adic precision, 
+imposing further restrictions on the remaining coefficients.
+
+The timings that we present in this chapter were obtained on the 
+departmental machine {\tt{wolverine.maths.ox.ac.uk}}, featuring twenty-four 
+\mbox{Intel Xeon} processors running at~2.93GHz, although none of the 
+computations utilise more than one processor.  In the following sections, 
+we describe some runtimes as \emph{near instantaneous}, by which we mean 
+that the resolution provided by the C~language command {\tt{clock()}} is 
+insufficient.
+
+\section{A genus six curve}
+
+We consider the family of genus six curves given by 
+\begin{equation*}
+x_0^5 + x_1^5 + x_2^5 + t x_0 x_1 x_2^3 \in \mathbf{F}_3[t][x_0,x_1,x_2]
+\end{equation*}
+which Gerkmann considers in~\citep[\S 7.4]{Gerkmann2007} with 
+$a = [\mathbf{F}_q : \mathbf{F}_p] = 40$ and $t_1$ a 
+generator for~$\mathbf{F}_{3^{40}}^{\times}$.  As the dimension 
+$n - 1$ of the hypersurface $X_{t_1}$ is odd, we only need to 
+determine the bottom half of the coefficients of the polynomial 
+$p(T)$ directly.  In our computation we use the following choice of 
+$p$-adic precisions $N_0 = N_1 = N_2 = 127$, $N_3 = 134$, $N_3' = 135$, 
+$N_4 = 142$ and note that in the analytic continuation step we 
+take $K_1 = 419$ and $K_2 = 2514$.
+
+We now compare the performance of our implementation with the 
+timings reported in~\citep[\S 7.4]{Gerkmann2007} where possible, 
+providing Gerkmann's timings in parentheses.  The computation of the 
+Gauss--Manin connection is near instantaneous with our implementation.  
+The computation of the Frobenius matrix on the diagonal fibre takes 
+$0.04$~seconds ($5.86$~minutes).  The local solution $C(t)$, its 
+inverse $C(t)^{-1}$ and the local expansion for $p^{-1} \Frob_p$ on 
+$\Hrig^n(U/S)$ are computed in $0.38$, $0.11$ 
+and $1.28$~seconds, respectively, adding up to $1.77$~seconds ($83$ seconds). 
+The analytic continuation and subsequent evaluation at a Teichm\"uller lift 
+of~$t_1$ take $0.05$ and $0.2$~seconds, and the computation of the $q$th-power 
+Frobenius requires another $7.33$~seconds ($101.4$ minutes).
+
+During the computation of the connection matrix over $\mathbf{Q}(t)$, 
+we find that it has denominator $r(t) = 135 t^5 + 15625$.  We 
+determine the exponents at each of the poles as $-1$ (with multiplicity~$5$) 
+and $0$ (with multiplicity~$7$), which allows us to justify the choice 
+of precisions using Theorem~\ref{thm:KedlayaTuitman}.
+
+\section{A quartic surface}
+
+We consider another example that allows for comparison with 
+Gerkmann~\citep[\S 7.5]{Gerkmann2007},
+\begin{equation*}
+x_0^4 + x_1^4 + x_2^4 + x_3^4 + t x_0 x_1 x_2 x_3 \in \mathbf{F}_3[t][x_0,x_1,x_2,x_3].
+\end{equation*}
+Here, we choose $a = 20$ and $t_1 = \alpha^{2345}$ where 
+$\alpha$ is a generator for $\mathbf{F}_{3^{20}}^{\times}$. 
+As the dimension $n - 1 = 2$ is even, a priori the sign of the 
+functional equation is unknown.  However, we can use 
+Remark~\ref{rem:N0Surfaces} and determine the polynomial 
+$3^{20} p\bigl(3^{-20} T\bigr) \in \mathbf{Z}[T]$ instead of $p(T)$. 
+Thus, we take $N_0 = 33$, $N_1 = N_2 = 53$, $N_3 = 65$, 
+$N_3' = 67$, $N_4 = 79$ as well as $K_1 = 174$ and $K_2 = 870$.
+
+The computation of the connection matrix is near instantaneous 
+again, although in this case this is largely due to the sparseness 
+of multivariate polynomial defining the family.  The Frobenius 
+matrix for the fibre at $t = 0$ is determined in $0.02$~seconds 
+($45.26$~minutes).  The local solutions $C(t)$ and $C(t)^{-1}$ 
+require $0.27$ and $0.08$ seconds, which together with the 
+computation local expansion of Frobenius in $0.15$ seconds 
+yields $0.5$~seconds ($19.9$~minutes).  The analytic continuation, 
+evaluation at the Teichm\"uller lift of $t_1$  and construction 
+of the $q$th-power Frobenius take $0.02$, $0.04$ and $0.62$ seconds, 
+respectively, adding up to $0.68$~seconds ($18.66$~minutes).  The 
+root-unitary polynomial that we find is given by 
+\begin{align*}
+3^{20} p\bigl(3^{-20} T\bigr) & = 
+  -3486784401 T^{21} - 39675197243 T^{20} - 191506614866 T^{19} \\
+& \quad - 482588946510 T^{18} - 552821487569 T^{17} + 243001138765 T^{16} \\
+& \quad + 1641410078472 T^{15} + 1793016627512 T^{14} - 410199003010 T^{13} \\
+& \quad - 2617001208822 T^{12} - 1586643774924 T^{11} + 1586643774924 T^{10} \\
+& \quad + 2617001208822 T^9 + 410199003010 T^8 - 1793016627512 T^7 \\
+& \quad - 1641410078472 T^6 - 243001138765 T^5 + 552821487569 T^4 \\
+& \quad + 482588946510 T^3 + 191506614866 T^2 + 39675197243 T + 3486784401.
+\end{align*}
+
+As before, we prove that our heuristic choice of $t$-adic precisions 
+was sufficient by computing the exponents of the connection. 
+We find that the connection matrix has denominator $r(t) = 2 t^4 - 512$, 
+which has distinct roots modulo~$3$, and at each of the four poles we 
+compute the exponents as $-3/2$ (with multiplicity~$1$), $-1/2$ (with 
+multiplicity~$15$), and $0$ (with multiplicity~$5$).
+Now Theorem~\ref{thm:KedlayaTuitman} establishes that the chosen 
+parameters were sufficient.
+
+\section{A quintic surface}
+
+The final example from Gerkmann~\citep[\S 7.6]{Gerkmann2007}, 
+containing a diagonal fibre and hence being suitable for comparison, 
+is given by 
+\begin{equation*}
+x_0^5 + x_1^5 + x_2^5 + x_3^5 + t x_0^2 x_1 x_2 x_3 \in \mathbf{F}_2[t][x_0,x_1,x_2,x_3],
+\end{equation*}
+with the point $t_1$ chosen as a generator of $\mathbf{F}_{2^{10}}^{\times}$. 
+Note that here we do \emph{not} have $p \geq n$ so the Frobenius matrix is not 
+automatically integral;  specifically, we find that $\delta = 5$.  Thus, 
+we can not employ Remark~\ref{rem:N0Surfaces}.  Moreover, the 
+dimension~$n-1 = 2$ of the hypersurface $X_{t_1}$ is even and hence 
+the sign of the functional equation is a priori unknown.
+We choose the $p$-adic precisions $N_0 = 522$, $N_1 = 527$, $N_2 = 572$, 
+$N_3 = 721$, $N_3' = 890$, and $N_4 = 872$ and let $K_1 = 1159$, $K_2 = 6954$.
+
+The computation of the connection matrix, which has density $98 / 52^2$ 
+or approximately~$0.036$, requires $0.07$~seconds ($40$~seconds).  
+The Frobenius matrix on the diagonal fibre requires $3.4$~seconds 
+($64.13$~minutes).  The computations of the matrices $C(t)$ and $C(t)^{-1}$ 
+are computed in $33.05$ and $17.07$~seconds, and the matrix product 
+$C(t) F(0) C^{-1}(t^p)$ is requires another $40.08$~seconds, leading 
+to an overall time of $90.2$~seconds ($31.03$~minutes) for the local 
+expansion of Frobenius.  Finally, the analytic continuation, evaluation 
+at~$\hat{t}_1$ and computation of the $q$th-power Frobenius take $3.09$, 
+$0.66$, and $1.16$~seconds, yielding a total of $4.91$~seconds ($4.9$ hours) 
+for this part of the computation.
+
+We note that Gerkmann observes that the family in this example does 
+not contain any singular fibres, which implies that a much lower value 
+of~$K_1$ would be sufficient.  This observation is important here as we 
+cannot apply Theorem~\ref{thm:KedlayaTuitman} in this case.  
+We find the denominator of the connection matrix $r(t) = 20 t^5+15625$ 
+and compute the exponents $-3/2$ (with multiplicity $4$), 
+$-1/2$ (with multiplicity $21$), and $0$ (with multiplicity $27$), 
+only to observe that some of them have negative $2$-adic valuation.
+
+\section{A cyclic cubic threefold}
+
+We now consider the family of threefolds given by 
+\begin{equation*}
+-x_0^3 + x_1^3 + x_2^3 + x_3^3 + x_4^3 
++ t\bigl((x_1+x_2)(x_1+2x_3)(x_1+3x_4) + 3 x_2 x_3 (x_1 + x_2 + x_4)\bigr) 
+\end{equation*}
+defined over $\mathbf{F}_{7}$.  With the final fibre defined by $t_1 = 1$, 
+this is an example that is extensively discussed by 
+Kedlaya~\citep[Example~1.6.1]{Kedlaya2011}.  
+
+Our work demonstrates that examples like this one can be computed in an 
+automated fashion in short time.  As the dimension $n-1 = 3$ is odd, our 
+choice of $p$-adic precisions is $N_0 = N_1 = N_2 = 12$, $N_3 = 24$, 
+$N_3' = 27$, $N_4 = 39$ and we have heuristic $t$-adic parameters $K_1 = 92$ 
+and $K_2 = 5796$.
+
+The Gauss--Manin connection matrix is a $10 \times 10$~matrix with 
+$50$~non-zero entries.  We find that the denominator $r(t)$ is a degree~$62$ 
+polynomial and has $r(1) \equiv 2 \pmod{7}$.  This part of the computation 
+requires $0.89$~seconds.  The Frobenius matrix for the diagonal fibre is 
+obtained in $0.01$~seconds.  The matrices $C(t)$ and $C(t)^{-1}$ are 
+computed in $9.99$ and $1.34$~seconds, respectively, followed by a matrix 
+product to compute the local expansion of Frobenius at $t = 0$ in 
+$3.67$~seconds.  The analytic continuation step now requires $0.21$~seconds, 
+but the remaining part of the computation is near instantaneous.
+
+We also verify that our output polynomial 
+\begin{align*}
+p(T) & = 4747561509943 T^{10}+96889010407 T^9+17795940687 T^8 +80707214 T^7 \\
+& \quad -25529833 T^6 
+-756315 T^5-74431 T^4+686 T^3+441 T^2+7 T+1
+\end{align*}
+agrees with Kedlaya's work~\citep[p.~20]{Kedlaya2011}.
+
+\section{A generic quintic curve}
+
+A family of quintic curves is given by a homogeneous polynomial 
+in three variables of degree~$5$, which generically has 
+$\binom{3+5-1}{5} = 21$ non-zero coefficients.  We choose 
+\begin{equation*}
+\begin{split}
+x_0^5 + x_1^5 + x_2^5 + t \bigl( 
+& 3 x_0^4 x_1 - x_0^4 x_2 + 2 x_0 x_1^4 + x_1^4 x_2 + 4 x_0 x_2^4 + 5 x_1 x_2^4 + x_0^3 x_1^2 + x_0^3 x_2^2 \\
+& + x_0^2 x_1^3 + x_1^3 x_2^2 + x_0^2 x_2^3 + x_1^2 x_2^3 + x_0^3 x_1 x_2 + x_0 x_1^3 x_2 + x_0 x_1 x_2^3 \\
+& + x_0^2 x_1^2 x_2 + x_0^2 x_1 x_2^2 + x_0 x_1^2 x_2^2 \bigr)
+\end{split}
+\end{equation*}
+over $\mathbf{F}_{11}$ and $t_1 = 1$.
+
+We note that $n-1 = 1$ is odd, that the sign of the functional 
+equation is positive and hence we only need to determine the 
+bottom half of the coefficients directly.  This allows us to 
+choose the $p$-adic precisions as $N_0 = N_1 = N_2 = 7$, 
+$N_3 = 10$, $N_3' = 11$, and $N_4 = 14$ and let $K_1 = 84$, $K_2 = 6636$.
+
+The computation of the connection matrix requires $6.55$~seconds, 
+yielding a dense matrix with denominator $r(t)$ a degree~$78$ 
+polynomial, and we verify that $r(1) \equiv 3 \pmod{11}$.  We obtain 
+the Frobenius matrix for the diagonal fibre in $0.02$~seconds.  The 
+local solutions $C(t)$ and $C(t)^{-1}$ are computed in $36.64$ and 
+$2.75$~seconds, respectively, which then allows us to compute the 
+local expansion of the Frobenius matrix around $t = 0$ in an additional 
+$14.45$~seconds.  Finally, the analytic continuation and evaluation steps 
+require $0.54$ and $0.02$~seconds.
+
+The output of the computation is the polynomial 
+\begin{align*}
+p(T) & = 1771561 T^{12}-322102 T^{11}+14641 T^{10}+17303 T^9-1936 T^8 \\
+     & \quad +2310 T^7-250 T^6+210 T^5-16 T^4+13 T^3+T^2-2 T+1.
+\end{align*}
+We heuristically confirm the correctness of this result by 
+numerically computing its complex roots, finding that they 
+have absolute value $11^{-1/2}$ as required.
+
+\section{A generic sextic curve}
+
+A family of sextic curves is given by a homogeneous polynomial 
+in three variables of degree~$6$, which generically has 
+$\binom{3+6-1}{6} = 28$ non-zero coefficients.  We choose 
+\begin{equation*}
+\begin{split}
+x_0^6 + x_1^6 + x_2^6 + t \bigl( 
+& - x_0^5 x_1 + 7 x_0^5 x_2 + 2 x_0 x_1^5 + x_1^5 x_2 + 2 x_0 x_2^5 + x_1 x_2^5 + 2 x_0^4 x_1^2 + 2 x_0^4 x_2^2 \\
+& + 3 x_0^2 x_1^4 + x_1^4 x_2^2 + 3 x_0^2 x_2^4 + x_1^2 x_0 + 2^4 + 3 x_0^4 x_1 x_2 + 3 x_0 x_1^4 x_2 + x_0 x_1 x_2^4 \\
+& - x_0^3 x_1^3 - 2 x_0^3 x_2^3 + 4 x_1^3 x_2^3 + 2 x_0^3 x_1^2 x_2 + x_0^3 x_1 x_2^2 - x_0^2 x_1^3 x_2 + x_0 x_1^3 x_2^2 \\
+& + 2 x_0^2 x_1 x_2^3 + x_0 x_1^2 x_2^3 + x_0^2 x_1^2 x_2^2 \bigr)
+\end{split}
+\end{equation*}
+over $\mathbf{F}_{5}$ and $t_1 = 2$.
+
+In this example, we note that $n-1 = 1$ is odd and hence we only need 
+to determine the bottom half of the coefficients of $p(T)$ directly.  
+The $p$-adic precisions we are led to use are $N_0 = N_1 = N_2 = 13$, 
+$N_3 = 18$, $N_3' = 19$, and $N_4 = 24$, and we take heuristic $t$-adic 
+parameters $K_1 = 71, K_2 = 8591$.
+
+The Gauss--Manin connection matrix, which is dense and has a degree~$120$ 
+denominator $r(t)$ in this example, is computed in $60.08$~seconds.  We 
+also calculate $r(t_1) \equiv 1 \pmod{5}$.  The computation of the 
+Frobenius matrix for the diagonal fibre takes $0.01$~seconds.  The 
+matrices $C(t)$ and $C(t)^{-1}$ require $530.08$ and $99.71$~seconds, 
+respectively, and we then compute the local expansion of the Frobenius 
+matrix in $94.87$~seconds.  The remaining two steps, the analytic continuation 
+and evaluation require $2.71$ and $0.11$~seconds, respectively.
+
+The final result of the computation is the polynomial 
+\begin{align*}
+p(T) & = 9765625 T^{20}-7812500 T^{19}+1562500 T^{18}+781250 T^{17}-531250 T^{16}\\
+     & \quad -56250 T^{15}+108125 T^{14}+5375 T^{13}-21475 T^{12}+4945 T^{11}-503 T^{10}\\
+     & \quad +989 T^9-859 T^8+43 T^7+173 T^6-18 T^5-34 T^4+10 T^3+4 T^2-4 T+1
+\end{align*}
+We verify that the reverse of $p(T)$ is a Weil polynomial and numerically 
+find that the absolute value of its complex roots is~$5^{-1/2}$.
+
+\section{A generic quartic surface}
+\label{sec:06-GenericQuarticSurface}
+
+We consider a generic quartic surface, defined by a homogeneous equation 
+with $35$~non-zero coefficients,
+\begin{equation*}
+\begin{split}
+x_0^4 + x_1^4 + x_2^4 + x_3^4 
++ t \bigl( & -3 x_0^3 x_1 + 2 x_0^3 x_2 - 2 x_0 x_1 x_2 x_3 + x_0^3 x_3 - x_0 x_1^3 - 3 x_1^3 x_2 + x_2^3 x_3 \\ &
+          + 2 x_1^3 x_3 + x_0 x_2^3 - 2 x_1 x_2^3 - x_0 x_3^3 + x_1 x_3^3 + 3 x_2 x_3^3 + x_0^2 x_1^2 \\ & 
+          + 3 x_0^2 x_2^2 + x_0^2 x_3^2 + 2 x_1^2 x_2^2 - 2 x_1^2 x_3^2 + x_2^2 x_3^2 
+          + 2 x_0^2 x_1 x_2 \\ & + x_0^2 x_1 x_3 + 3 x_0^3 x_2 x_3 - x_0 x_1^2 x_2 + 2 x_0 x_1^2 x_3 
+          + 3 x_1^2 x_2 x_3 - x_0 x_1 x_2^2 \\ & 
+          + 3 x_0 x_2^2 x_3 + x_1 x_2^2 x_3 + 2 x_0 x_1 x_3^2 + 2 x_0 x_2 x_3^2 + 2 x_1 x_2 x_3^2 \bigr)
+\end{split}
+\end{equation*}
+defined over $\mathbf{F}_5$ with $t_1 = 1$.
+
+This example is a surface and we have $p \geq n$, hence the matrix of Frobenius 
+is automatically integral.  We aim to compute $5 p(T/5)$ instead of $p(T)$, 
+following Remark~\ref{rem:N0Surfaces}.  This allows us to take $N_0 = 10$, 
+$N_1 = N_2 = 11$, $N_3 = 21$, $N_3' = 23$, and $N_4 = 33$, together with 
+$K_1 = 60$ and $K_2 = 13740$.
+
+The Gauss--Manin connection matrix is computed in $323.55$~seconds and found 
+to have denominator $r(t)$ of degree~$228$, which explains the large value 
+of the $t$-adic parameter~$K_2$.  The matrix for $p^{-1} \Frob_p$ on 
+$\Hrig^{n}(U_0)$ is computed in $0.01$~seconds.  The local 
+solutions $C$ and $C^{-1}$ form the most time-consuming part in this example, 
+requiring $1909.3$ and $342.22$~seconds.  The matrix product to determine the 
+local expansion of $p^{-1} \Frob_p$ on $\Hrig^{n}(U/S)$ 
+takes $262.6$~seconds. Finally, the analytic continuation and evaluation steps 
+require $4.53$ and $0.18$~seconds, respectively.
+
+\section{Another quartic surface}
+
+We consider family of quartic surfaces inspired by an example of 
+Abbott, Kedlaya, and Roe~\citep[Example~4.2.1]{AbbottKedlayaRoe2006}, 
+\begin{equation*}
+x_0^4 + x_1^4 + x_2^4 + x_3^4 + t \bigl(
+    -x_1 x_2^3 + x_0 x_1 x_2^2 + x_0 x_1 x_2 x_3  + x_0^2 x_1 x_2 - x_0^2 x_1 x_3 + x_0 x_2^3 - x_0 x_2^2 x_3 \bigr)
+\end{equation*}
+defined over $\mathbf{F}_3$.  They consider the smooth surface~$X_1$ 
+and report a runtime of $40,144$ seconds, or $11.15$~hours.  Unfortunately, 
+with our current implementation we cannot tackle this exact example 
+as, with our fixed choice of basis, the Gauss--Manin connection matrix 
+has an apparent singularity at $t = 1$ (and also at $t = 2$).  Instead, 
+we let $t_1$ be a generator of $\mathbf{F}_{3^2}^{\times}$.
+
+Once again, we can employ Remark~\ref{rem:N0Surfaces}, which here allows 
+us to take $p$-adic precisions $N_0 = 15$, $N_1 = N_2 = 17$, $N_3 = 33$, 
+$N_3' = 35$, $N_51$, and $t$-adic parameters $K_1 = 56$ and $K_2 = 9632$.
+
+The computation of the Gauss--Manin connection matrix requires $36.6$~seconds, 
+which also shows that the denominator $r(t)$ is a degree~$168$ polynomial.
+The action of $p^{-1} \Frob_p$ for the diagonal fibre is determined in 
+$0.01$~seconds.  The local solutions $C(t)$ and $C(t)^{-1}$ are found in 
+$953.59$ and $311$~seconds, which then allow us to compute the local expansion 
+of Frobenius in $153.44$~seconds.  The analytic expansion and 
+evaluation require $3.77$ and $0.24$~seconds, respectively, and the final 
+construction of the $q$th-power Frobenius is near instantaneous. 
+This yields a total runtime of about $1,458$~seconds.
+
+%\section{A cubic surface}
+%
+%We consider the following example of a cubic surface over 
+%$\mathbf{F}_5$ due to Abbott, Kedlaya, and 
+%Roe~\citep[Example~4.3.2]{AbbottKedlayaRoe2006},
+%\begin{equation*}
+%w^3 + 3 x^3 + y^3 + 2 z^3 
+%+ t \bigl( 3 x y^2 - w x y + 3 w x z - w^2 x - w y^2 \bigr).
+%\end{equation*}
+%They report that the computation of the matrix representing 
+%the action of $p^{-1} \Frob_p$ for the fibre at $t_1 = 1$ modulo 
+%$5^3$ required $5,482$~seconds.
+%
+%For smooth projective cubic surfaces, $h_{0,2} = 0$ and hence 
+%we aim to compute $p(T/5)$, using Remark~\ref{rem:N0Surfaces}. 
+%This also shows that it is sufficient to take $N_0 = 3$ as 
+%in~\citep{AbbottKedlayaRoe2006}.  We are led to 
+%take $N_1 = N_2 = 4$, $N_3 = 10$, $N_3' = 12$, $N_4 = 18$, and 
+%$K_1 = 22$, $K_2 = 616$.
+%
+%Using our implementation, the connection matrix is computed 
+%in $0.16$~seconds, the computation of the action of Frobenius 
+%on the diagonal fibre is near instantaneous, we obtain $C(t)$, 
+%$C(t)^{-1}$ and the local expansion of $p^{-1} \Frob_p$ around the 
+%origin together in $0.2$~seconds, and the remaining steps of 
+%the deformation method are near instantaneous again.  This yields 
+%an overall runtime of about $0.36$~seconds, which improves on 
+%the runtime reported in~\citep{AbbottKedlayaRoe2006} by a factor 
+%of $15,227$.
+
